@@ -77,6 +77,7 @@
             refreshTable.TabIndex = 4;
             refreshTable.Text = "Обновить";
             refreshTable.UseVisualStyleBackColor = false;
+            refreshTable.Click += refreshTable_Click;
             // 
             // aUserForm
             // 
@@ -92,6 +93,7 @@
             Name = "aUserForm";
             Text = "Пользователи";
             FormClosed += aUserForm_FormClosed;
+            Shown += aUserForm_Shown;
             ((System.ComponentModel.ISupportInitialize)userInfoTable).EndInit();
             ResumeLayout(false);
             PerformLayout();

@@ -13,9 +13,11 @@ namespace CinemaClient.Forms
 {
     public partial class AdminForm : Form
     {
-        public AdminForm(ApiService _api)
+        private readonly ApiService _api;
+        public AdminForm(ApiService api)
         {
             InitializeComponent();
+            _api = api;
         }
 
         private void chOtmena_Click(object sender, EventArgs e)
@@ -26,7 +28,7 @@ namespace CinemaClient.Forms
 
         private void chUser_Click(object sender, EventArgs e)
         {
-            var userForm = new aUserForm();
+            var userForm = new aUserForm(_api);
             userForm.FormClosed += (s, args) => this.Show(); // Возвращаем AdminForm после закрытия UserForm
 
             this.Hide(); // Скрываем текущую форму (AdminForm)

@@ -13,12 +13,22 @@ namespace CinemaClient.Forms
 {
     public partial class aUserForm : Form
     {
-        ApiService _api;
+        private readonly ApiService _api;
 
-        public aUserForm()
+        public aUserForm(ApiService api)
         {
             InitializeComponent();
+            _api = api;
+            LoadUsersData().ConfigureAwait(false); // Используем ConfigureAwait(false) для избежания deadlock
+            Load += async (_, _) => await LoadUsersData();
         }
+
+        protected override async void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            await LoadUsersData();
+        }
+
 
         private async Task LoadUsersData() // загружаем данные юзеров
         {
@@ -81,9 +91,21 @@ namespace CinemaClient.Forms
                     MessageBox.Show($"Ошибка при удалении: {ex.Message}", "Ошибка",
                                   MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+
             }
 
             // В любом случае обновляем данные в таблице
+            await LoadUsersData();
+        }
+
+        private async void refreshTable_Click(object sender, EventArgs e)
+        {
+            await LoadUsersData(); // Принудительное обновление данных
+            MessageBox.Show("Данные обновлены", "Инфо", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private async void aUserForm_Shown(object sender, EventArgs e)
+        {
             await LoadUsersData();
         }
     }
