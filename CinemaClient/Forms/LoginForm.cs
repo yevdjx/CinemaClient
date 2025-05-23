@@ -39,7 +39,8 @@ namespace CinemaClient.Forms
 
         private void btnReg_Click(object sender, EventArgs e)
         {
-
+            var dlg = new RegistrationForm(_api);   // передаём тот же ApiService
+            dlg.ShowDialog(this);
         }
     }
 }
