@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CinemaClient.Services;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,7 +13,7 @@ namespace CinemaClient.Forms
 {
     public partial class AdminForm : Form
     {
-        public AdminForm()
+        public AdminForm(ApiService _api)
         {
             InitializeComponent();
         }

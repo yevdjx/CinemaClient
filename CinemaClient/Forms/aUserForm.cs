@@ -20,15 +20,14 @@ namespace CinemaClient.Forms
             InitializeComponent();
         }
 
-        private async void LoadUsersData() // загружаем данные юзеров
+        private async Task LoadUsersData() // загружаем данные юзеров
         {
             try
             {
                 // загружаем данные пользователей из бд и заносим в табличку
 
-                //var users = await _api.GetUsersAsync();
-                //_usersBindingSource.DataSource = users.ToList();
-                //dataGridViewUsers.Refresh();
+                var data = (await _api.GetUsersAsync()).ToList();
+                userInfoTable.DataSource = data;
             }
             catch (Exception ex)
             {
@@ -41,9 +40,51 @@ namespace CinemaClient.Forms
             // уже обработали в предыдущей форме
         }
 
-        private void userInfoTable_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        private async void userInfoTable_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             // логика удаления юзеров
+            // Проверяем, что кликнули по строке с данными (не по заголовку)
+            if (e.RowIndex < 0) return;
+
+            // Получаем выделенного пользователя
+            var selectedUser = userInfoTable.Rows[e.RowIndex].DataBoundItem as UserDto;
+            if (selectedUser == null) return;
+
+            // Диалог подтверждения удаления
+            var result = MessageBox.Show(
+                $"Точно ли вы хотите удалить пользователя {selectedUser.Login} (ID: {selectedUser.UserId})?",
+                "Подтверждение удаления",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            // Если пользователь подтвердил удаление
+            if (result == DialogResult.Yes)
+            {
+                try
+                {
+                    // Вызываем метод удаления
+                    bool success = await _api.DeleteUserAsync(selectedUser.UserId);
+
+                    if (success)
+                    {
+                        MessageBox.Show("Пользователь успешно удален", "Успех",
+                                      MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Не удалось удалить пользователя", "Ошибка",
+                                      MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при удалении: {ex.Message}", "Ошибка",
+                                  MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+            // В любом случае обновляем данные в таблице
+            await LoadUsersData();
         }
     }
 }

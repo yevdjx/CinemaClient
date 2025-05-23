@@ -2,6 +2,9 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+
 
 namespace CinemaClient.Services;
 
@@ -9,6 +12,19 @@ public class ApiService
 {
     private readonly HttpClient _http;
     public string? Jwt { get; private set; }
+
+    public string? GetUserRole()
+    {
+        if (string.IsNullOrEmpty(Jwt)) return null;
+
+        if (string.IsNullOrEmpty(Jwt))
+            return null;
+
+        var handler = new JwtSecurityTokenHandler();
+        var token = handler.ReadJwtToken(Jwt); // Декодируем токен без проверки подписи
+        return token.Claims
+                   .FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value; // Ищем claim с ролью
+    }
 
     public ApiService(string baseUrl)
     {
@@ -69,6 +85,15 @@ public class ApiService
         => (await _http.PostAsJsonAsync("/booking/buy", new { ticketId }))
            .StatusCode == System.Net.HttpStatusCode.OK ? 0 : -1;
 
+    public async Task<IEnumerable<UserDto>> GetUsersAsync()
+    => await _http.GetFromJsonAsync<IEnumerable<UserDto>>("/users")!;
+
+    public async Task<bool> DeleteUserAsync(int userId)
+    {
+        var response = await _http.DeleteAsync($"/users/{userId}");
+        return response.IsSuccessStatusCode;
+    }
+
     private record LoginResponse(string Token);
 }
 
@@ -76,3 +101,11 @@ public record SessionDto(int SessionId, DateTime SessionDateTime,
                          string HallNumber, string MovieTitle, decimal Price);
 
 public record SeatDto(int TicketId, int Row, int Number, string Status);
+
+public record UserDto(
+    int UserId,
+    string Login,
+    string Role,
+    byte[] PasswordHash
+);
+
