@@ -1,4 +1,5 @@
 ﻿// Services/ApiService.cs
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -24,6 +25,34 @@ public class ApiService
         Jwt = (await resp.Content.ReadFromJsonAsync<LoginResponse>())!.Token;
         _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Jwt);
         return true;
+    }
+
+    public async Task<string?> RegisterAsync(string login, string pass, string pass2,
+                                         string first, string last, string email)
+    {
+        var body = new
+        {
+            Login = login,
+            Password = pass,
+            ConfirmPassword = pass2,
+            FirstName = first,
+            LastName = last,
+            Email = email
+        };
+
+        var resp = await _http.PostAsJsonAsync("/auth/register", body);
+
+        // 200 – успех
+        if (resp.IsSuccessStatusCode) return null;
+
+        // извлекаем текст ошибки
+        string msg = await resp.Content.ReadAsStringAsync();
+        return resp.StatusCode switch
+        {
+            HttpStatusCode.Conflict => "Пользователь с таким логином уже существует",
+            HttpStatusCode.BadRequest => "Пароли не совпадают",
+            _ => $"Сервер вернул ошибку: {msg}"
+        };
     }
 
     public async Task<IEnumerable<SessionDto>> GetSessionsAsync()

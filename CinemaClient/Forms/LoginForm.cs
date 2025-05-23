@@ -13,7 +13,7 @@ namespace CinemaClient.Forms
 {
     public partial class LoginForm : Form
     {
-        private readonly ApiService _api;           // ★ поле
+        private readonly ApiService _api;           // поле
 
         // конструктор для Program.cs
         public LoginForm(ApiService api)
@@ -22,8 +22,6 @@ namespace CinemaClient.Forms
             _api = api;
         }
 
-        // ← если дизайнеру нужен параметрless-ctor, оставь его «для дизайнера»
-        //    и сделай его protected / private, чтобы им не пользовались извне:
         private LoginForm() => InitializeComponent();
 
         private async void btnLogin_Click(object sender, EventArgs e)
@@ -37,6 +35,11 @@ namespace CinemaClient.Forms
             }
             else
                 MessageBox.Show("Неверный логин или пароль");
+        }
+
+        private void btnReg_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
