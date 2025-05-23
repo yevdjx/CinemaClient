@@ -25,7 +25,11 @@ namespace CinemaClient.Forms
 
         private void chUser_Click(object sender, EventArgs e)
         {
+            var userForm = new aUserForm();
+            userForm.FormClosed += (s, args) => this.Show(); // Возвращаем AdminForm после закрытия UserForm
 
+            this.Hide(); // Скрываем текущую форму (AdminForm)
+            userForm.Show(); // Открываем UserForm
         }
 
         private void chFilm_Click(object sender, EventArgs e)
