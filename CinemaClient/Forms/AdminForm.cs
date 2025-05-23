@@ -22,7 +22,13 @@ namespace CinemaClient.Forms
 
         }
 
-        private void бронированиеToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void chUser_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void chFilm_Click(object sender, EventArgs e)
         {
 
         }
