@@ -34,19 +34,25 @@
             // 
             // dgvSessions
             // 
+            dgvSessions.BackgroundColor = Color.Pink;
             dgvSessions.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvSessions.Location = new Point(42, 31);
+            dgvSessions.GridColor = Color.PaleVioletRed;
+            dgvSessions.Location = new Point(48, 41);
+            dgvSessions.Margin = new Padding(3, 4, 3, 4);
             dgvSessions.Name = "dgvSessions";
-            dgvSessions.Size = new Size(645, 387);
+            dgvSessions.RowHeadersWidth = 51;
+            dgvSessions.Size = new Size(737, 516);
             dgvSessions.TabIndex = 0;
             dgvSessions.CellContentDoubleClick += dgvSessions_CellDoubleClick;
             // 
             // SessionsForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            BackColor = Color.AntiqueWhite;
+            ClientSize = new Size(914, 600);
             Controls.Add(dgvSessions);
+            Margin = new Padding(3, 4, 3, 4);
             Name = "SessionsForm";
             Text = "SessionsForm";
             Load += SessionsForm_Load;

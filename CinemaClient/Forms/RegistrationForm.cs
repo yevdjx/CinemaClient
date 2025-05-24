@@ -19,7 +19,7 @@ namespace CinemaClient.Forms
             InitializeComponent();
             _api = api;
         }
-        private void Pass2_TextChanged(object? sender, EventArgs e) 
+        private void Pass2_TextChanged(object? sender, EventArgs e)
         {
             bool ok = txtPass1.Text == txtPass2.Text;
             lblMatch.Text = ok ? "" : "Пароли не совпадают";
@@ -47,5 +47,16 @@ namespace CinemaClient.Forms
                 MessageBox.Show(err);
         }
 
+        private void txtPass1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            txtPass1.UseSystemPasswordChar = true; // Это свойство заменяет символы точками
+            txtPass1.PasswordChar = '•'; // Можно использовать любой символ вместо точек
+        }
+
+        private void txtPass2_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            txtPass2.UseSystemPasswordChar = true; // Это свойство заменяет символы точками
+            txtPass2.PasswordChar = '•'; // Можно использовать любой символ вместо точек
+        }
     }
 }

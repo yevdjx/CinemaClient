@@ -94,6 +94,7 @@
             txtPass1.Name = "txtPass1";
             txtPass1.Size = new Size(216, 40);
             txtPass1.TabIndex = 4;
+            txtPass1.KeyPress += txtPass1_KeyPress;
             // 
             // txtPass2
             // 
@@ -105,6 +106,7 @@
             txtPass2.Size = new Size(216, 40);
             txtPass2.TabIndex = 5;
             txtPass2.TextChanged += Pass2_TextChanged;
+            txtPass2.KeyPress += txtPass2_KeyPress;
             // 
             // label1
             // 

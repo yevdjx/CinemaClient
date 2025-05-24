@@ -70,6 +70,7 @@
             txtPassword.Name = "txtPassword";
             txtPassword.Size = new Size(256, 38);
             txtPassword.TabIndex = 2;
+            txtPassword.KeyPress += txtPassword_KeyPress;
             // 
             // label1
             // 
