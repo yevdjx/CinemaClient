@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             menuStrip1 = new MenuStrip();
-            chUser = new ToolStripMenuItem();
             chFilm = new ToolStripMenuItem();
             chOtmena = new ToolStripMenuItem();
             chTicketSostoyanie = new ToolStripMenuItem();
@@ -42,23 +41,12 @@
             // menuStrip1
             // 
             menuStrip1.ImageScalingSize = new Size(24, 24);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { chUser, chFilm, chOtmena, chTicketSostoyanie });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { chFilm, chOtmena, chTicketSostoyanie });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(724, 30);
+            menuStrip1.Size = new Size(724, 32);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
-            // 
-            // chUser
-            // 
-            chUser.BackColor = Color.PaleVioletRed;
-            chUser.Font = new Font("Bahnschrift", 9F);
-            chUser.ForeColor = Color.Black;
-            chUser.Name = "chUser";
-            chUser.Size = new Size(144, 26);
-            chUser.Text = "Пользователи";
-            chUser.TextDirection = ToolStripTextDirection.Horizontal;
-            chUser.Click += chUser_Click;
             // 
             // chFilm
             // 
@@ -66,7 +54,7 @@
             chFilm.Font = new Font("Bahnschrift", 9F);
             chFilm.ForeColor = Color.Black;
             chFilm.Name = "chFilm";
-            chFilm.Size = new Size(94, 26);
+            chFilm.Size = new Size(94, 28);
             chFilm.Text = "Фильмы";
             chFilm.Click += chFilm_Click;
             // 
@@ -76,7 +64,7 @@
             chOtmena.Font = new Font("Bahnschrift", 9F);
             chOtmena.ForeColor = Color.Black;
             chOtmena.Name = "chOtmena";
-            chOtmena.Size = new Size(208, 26);
+            chOtmena.Size = new Size(208, 28);
             chOtmena.Text = "Отмена брони/билета";
             chOtmena.TextDirection = ToolStripTextDirection.Horizontal;
             chOtmena.Click += chOtmena_Click;
@@ -87,7 +75,7 @@
             chTicketSostoyanie.Font = new Font("Bahnschrift", 9F);
             chTicketSostoyanie.ForeColor = Color.Black;
             chTicketSostoyanie.Name = "chTicketSostoyanie";
-            chTicketSostoyanie.Size = new Size(185, 26);
+            chTicketSostoyanie.Size = new Size(185, 28);
             chTicketSostoyanie.Text = "Состояние билетов";
             chTicketSostoyanie.TextDirection = ToolStripTextDirection.Horizontal;
             // 
@@ -148,7 +136,6 @@
         #endregion
 
         private MenuStrip menuStrip1;
-        private ToolStripMenuItem chUser;
         private ToolStripMenuItem chFilm;
         private ToolStripMenuItem chOtmena;
         private ToolStripMenuItem chTicketSostoyanie;
