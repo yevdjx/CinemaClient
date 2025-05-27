@@ -50,54 +50,6 @@ namespace CinemaClient.Forms
             // уже обработали в предыдущей форме
         }
 
-        private async void userInfoTable_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            // логика удаления юзеров
-            // Проверяем, что кликнули по строке с данными (не по заголовку)
-            if (e.RowIndex < 0) return;
-
-            // Получаем выделенного пользователя
-            var selectedUser = userInfoTable.Rows[e.RowIndex].DataBoundItem as UserDto;
-            if (selectedUser == null) return;
-
-            // Диалог подтверждения удаления
-            var result = MessageBox.Show(
-                $"Точно ли вы хотите удалить пользователя {selectedUser.Login} (ID: {selectedUser.UserId})?",
-                "Подтверждение удаления",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-
-            // Если пользователь подтвердил удаление
-            if (result == DialogResult.Yes)
-            {
-                try
-                {
-                    // Вызываем метод удаления
-                    bool success = await _api.DeleteUserAsync(selectedUser.UserId);
-
-                    if (success)
-                    {
-                        MessageBox.Show("Пользователь успешно удален", "Успех",
-                                      MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show("Не удалось удалить пользователя", "Ошибка",
-                                      MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Ошибка при удалении: {ex.Message}", "Ошибка",
-                                  MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-
-            }
-
-            // В любом случае обновляем данные в таблице
-            await LoadUsersData();
-        }
-
         private async void refreshTable_Click(object sender, EventArgs e)
         {
             await LoadUsersData(); // Принудительное обновление данных
