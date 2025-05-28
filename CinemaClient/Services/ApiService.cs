@@ -302,6 +302,7 @@ public class ApiService
 public record SessionDto(int SessionId, DateTime SessionDateTime,
                          string HallNumber, string MovieTitle, byte[] MovieImage, decimal Price);
 
+
 public record SeatDto(int TicketId, int Row, int Number, string Status);
 
 public record UserDto(
@@ -318,5 +319,19 @@ public record MovieDto(
     string movieAuthor,
     string movieAgeRating,
     byte[] movieImg
+);
+
+public record KorzinaDto(
+    int SessionId,
+    int MovieId,
+    string MovieTitle,
+    string HallName,
+    DateTime SessionDate,
+    string StartTime,
+    string EndTime,
+    decimal BasePrice,
+    string FormattedDate,
+    string FullTimeInfo,
+    string FullSessionInfo
 );
 
