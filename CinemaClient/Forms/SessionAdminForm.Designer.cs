@@ -30,29 +30,29 @@
         {
             groupBox2 = new GroupBox();
             label1 = new Label();
-            filmList = new DataGridView();
+            sessionList = new DataGridView();
             groupBox1 = new GroupBox();
-            deleteButton = new Button();
-            changeButton = new Button();
-            saveButton = new Button();
-            takeAge = new TextBox();
-            takeDir = new TextBox();
-            takeProd = new TextBox();
-            takeFilmName = new TextBox();
+            takeTime = new DateTimePicker();
+            delButton = new Button();
+            otmenButton = new Button();
+            sohrButton = new Button();
+            takePrice = new TextBox();
             label6 = new Label();
             label5 = new Label();
             label4 = new Label();
             label3 = new Label();
             label2 = new Label();
+            comboHall = new ComboBox();
+            comboFilm = new ComboBox();
             groupBox2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)filmList).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)sessionList).BeginInit();
             groupBox1.SuspendLayout();
             SuspendLayout();
             // 
             // groupBox2
             // 
             groupBox2.Controls.Add(label1);
-            groupBox2.Controls.Add(filmList);
+            groupBox2.Controls.Add(sessionList);
             groupBox2.Location = new Point(12, 428);
             groupBox2.Name = "groupBox2";
             groupBox2.Size = new Size(1006, 308);
@@ -70,27 +70,27 @@
             label1.TabIndex = 1;
             label1.Text = "Список сеансов:";
             // 
-            // filmList
+            // sessionList
             // 
-            filmList.BackgroundColor = Color.BlanchedAlmond;
-            filmList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            filmList.ColumnHeadersVisible = false;
-            filmList.Location = new Point(26, 77);
-            filmList.Name = "filmList";
-            filmList.RowHeadersVisible = false;
-            filmList.RowHeadersWidth = 62;
-            filmList.Size = new Size(954, 202);
-            filmList.TabIndex = 0;
+            sessionList.BackgroundColor = Color.BlanchedAlmond;
+            sessionList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            sessionList.ColumnHeadersVisible = false;
+            sessionList.Location = new Point(26, 77);
+            sessionList.Name = "sessionList";
+            sessionList.RowHeadersVisible = false;
+            sessionList.RowHeadersWidth = 62;
+            sessionList.Size = new Size(954, 202);
+            sessionList.TabIndex = 0;
             // 
             // groupBox1
             // 
-            groupBox1.Controls.Add(deleteButton);
-            groupBox1.Controls.Add(changeButton);
-            groupBox1.Controls.Add(saveButton);
-            groupBox1.Controls.Add(takeAge);
-            groupBox1.Controls.Add(takeDir);
-            groupBox1.Controls.Add(takeProd);
-            groupBox1.Controls.Add(takeFilmName);
+            groupBox1.Controls.Add(comboFilm);
+            groupBox1.Controls.Add(comboHall);
+            groupBox1.Controls.Add(takeTime);
+            groupBox1.Controls.Add(delButton);
+            groupBox1.Controls.Add(otmenButton);
+            groupBox1.Controls.Add(sohrButton);
+            groupBox1.Controls.Add(takePrice);
             groupBox1.Controls.Add(label6);
             groupBox1.Controls.Add(label5);
             groupBox1.Controls.Add(label4);
@@ -102,88 +102,67 @@
             groupBox1.TabIndex = 5;
             groupBox1.TabStop = false;
             // 
-            // deleteButton
+            // takeTime
             // 
-            deleteButton.BackColor = Color.MistyRose;
-            deleteButton.Font = new Font("Bahnschrift SemiBold Condensed", 12F, FontStyle.Bold);
-            deleteButton.ForeColor = Color.Maroon;
-            deleteButton.Location = new Point(737, 279);
-            deleteButton.Name = "deleteButton";
-            deleteButton.Size = new Size(209, 67);
-            deleteButton.TabIndex = 14;
-            deleteButton.Text = "Удалить";
-            deleteButton.UseVisualStyleBackColor = false;
+            takeTime.CalendarMonthBackground = Color.Pink;
+            takeTime.CalendarTitleBackColor = Color.Maroon;
+            takeTime.Location = new Point(293, 218);
+            takeTime.Name = "takeTime";
+            takeTime.Size = new Size(329, 31);
+            takeTime.TabIndex = 15;
             // 
-            // changeButton
+            // delButton
             // 
-            changeButton.BackColor = Color.MistyRose;
-            changeButton.Font = new Font("Bahnschrift SemiBold Condensed", 12F, FontStyle.Bold);
-            changeButton.ForeColor = Color.Maroon;
-            changeButton.Location = new Point(737, 163);
-            changeButton.Name = "changeButton";
-            changeButton.Size = new Size(209, 67);
-            changeButton.TabIndex = 13;
-            changeButton.Text = "Отменить изменения";
-            changeButton.UseVisualStyleBackColor = false;
+            delButton.BackColor = Color.MistyRose;
+            delButton.Font = new Font("Bahnschrift SemiBold Condensed", 12F, FontStyle.Bold);
+            delButton.ForeColor = Color.Maroon;
+            delButton.Location = new Point(737, 279);
+            delButton.Name = "delButton";
+            delButton.Size = new Size(209, 67);
+            delButton.TabIndex = 14;
+            delButton.Text = "Удалить";
+            delButton.UseVisualStyleBackColor = false;
             // 
-            // saveButton
+            // otmenButton
             // 
-            saveButton.BackColor = Color.MistyRose;
-            saveButton.Font = new Font("Bahnschrift SemiBold Condensed", 12F, FontStyle.Bold);
-            saveButton.ForeColor = Color.Maroon;
-            saveButton.Location = new Point(737, 47);
-            saveButton.Name = "saveButton";
-            saveButton.Size = new Size(209, 67);
-            saveButton.TabIndex = 12;
-            saveButton.Text = "Сохранить";
-            saveButton.UseVisualStyleBackColor = false;
+            otmenButton.BackColor = Color.MistyRose;
+            otmenButton.Font = new Font("Bahnschrift SemiBold Condensed", 12F, FontStyle.Bold);
+            otmenButton.ForeColor = Color.Maroon;
+            otmenButton.Location = new Point(737, 163);
+            otmenButton.Name = "otmenButton";
+            otmenButton.Size = new Size(209, 67);
+            otmenButton.TabIndex = 13;
+            otmenButton.Text = "Отменить изменения";
+            otmenButton.UseVisualStyleBackColor = false;
             // 
-            // takeAge
+            // sohrButton
             // 
-            takeAge.BackColor = Color.Pink;
-            takeAge.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            takeAge.ForeColor = Color.Maroon;
-            takeAge.Location = new Point(293, 290);
-            takeAge.Name = "takeAge";
-            takeAge.Size = new Size(329, 36);
-            takeAge.TabIndex = 11;
+            sohrButton.BackColor = Color.MistyRose;
+            sohrButton.Font = new Font("Bahnschrift SemiBold Condensed", 12F, FontStyle.Bold);
+            sohrButton.ForeColor = Color.Maroon;
+            sohrButton.Location = new Point(737, 47);
+            sohrButton.Name = "sohrButton";
+            sohrButton.Size = new Size(209, 67);
+            sohrButton.TabIndex = 12;
+            sohrButton.Text = "Сохранить";
+            sohrButton.UseVisualStyleBackColor = false;
             // 
-            // takeDir
+            // takePrice
             // 
-            takeDir.BackColor = Color.Pink;
-            takeDir.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            takeDir.ForeColor = Color.Maroon;
-            takeDir.Location = new Point(293, 216);
-            takeDir.Name = "takeDir";
-            takeDir.Size = new Size(329, 36);
-            takeDir.TabIndex = 10;
-            // 
-            // takeProd
-            // 
-            takeProd.BackColor = Color.Pink;
-            takeProd.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            takeProd.ForeColor = Color.Maroon;
-            takeProd.Location = new Point(293, 149);
-            takeProd.Name = "takeProd";
-            takeProd.Size = new Size(329, 36);
-            takeProd.TabIndex = 8;
-            // 
-            // takeFilmName
-            // 
-            takeFilmName.BackColor = Color.Pink;
-            takeFilmName.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            takeFilmName.ForeColor = Color.Maroon;
-            takeFilmName.Location = new Point(293, 80);
-            takeFilmName.Name = "takeFilmName";
-            takeFilmName.Size = new Size(329, 36);
-            takeFilmName.TabIndex = 7;
+            takePrice.BackColor = Color.Pink;
+            takePrice.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            takePrice.ForeColor = Color.Maroon;
+            takePrice.Location = new Point(293, 290);
+            takePrice.Name = "takePrice";
+            takePrice.Size = new Size(329, 36);
+            takePrice.TabIndex = 11;
             // 
             // label6
             // 
             label6.AutoSize = true;
             label6.Font = new Font("Bahnschrift Condensed", 14F, FontStyle.Regular, GraphicsUnit.Point, 204);
             label6.ForeColor = Color.DeepPink;
-            label6.Location = new Point(34, 278);
+            label6.Location = new Point(34, 292);
             label6.Name = "label6";
             label6.Size = new Size(135, 34);
             label6.TabIndex = 6;
@@ -233,18 +212,37 @@
             label2.TabIndex = 2;
             label2.Text = "Сеанс";
             // 
+            // comboHall
+            // 
+            comboHall.BackColor = Color.Pink;
+            comboHall.FormattingEnabled = true;
+            comboHall.Location = new Point(293, 67);
+            comboHall.Name = "comboHall";
+            comboHall.Size = new Size(329, 33);
+            comboHall.TabIndex = 17;
+            // 
+            // comboFilm
+            // 
+            comboFilm.BackColor = Color.Pink;
+            comboFilm.FormattingEnabled = true;
+            comboFilm.Location = new Point(293, 153);
+            comboFilm.Name = "comboFilm";
+            comboFilm.Size = new Size(329, 33);
+            comboFilm.TabIndex = 18;
+            // 
             // SessionAdminForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.AntiqueWhite;
             ClientSize = new Size(1040, 735);
             Controls.Add(groupBox2);
             Controls.Add(groupBox1);
             Name = "SessionAdminForm";
-            Text = "SessionAdminForm";
+            Text = "Сеансы";
             groupBox2.ResumeLayout(false);
             groupBox2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)filmList).EndInit();
+            ((System.ComponentModel.ISupportInitialize)sessionList).EndInit();
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             ResumeLayout(false);
@@ -254,19 +252,21 @@
 
         private GroupBox groupBox2;
         private Label label1;
-        private DataGridView filmList;
+        private DataGridView sessionList;
         private GroupBox groupBox1;
-        private Button deleteButton;
-        private Button changeButton;
-        private Button saveButton;
-        private TextBox takeAge;
+        private Button delButton;
+        private Button otmenButton;
+        private Button sohrButton;
+        private TextBox takePrice;
         private TextBox takeDir;
         private TextBox takeProd;
-        private TextBox takeFilmName;
         private Label label6;
         private Label label5;
         private Label label4;
         private Label label3;
         private Label label2;
+        private DateTimePicker takeTime;
+        private ComboBox comboFilm;
+        private ComboBox comboHall;
     }
 }
