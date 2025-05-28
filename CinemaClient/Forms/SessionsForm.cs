@@ -137,6 +137,7 @@ namespace CinemaClient.Forms
                 Margin = new Padding(20),
                 BackColor = Color.MistyRose,
                 BorderStyle = BorderStyle.FixedSingle
+
             };
 
             // Постер фильма
@@ -182,8 +183,8 @@ namespace CinemaClient.Forms
                 {
                     Text = session.SessionDateTime.ToString("HH:mm") + $"\n{session.Price} ₽",
                     Tag = session.SessionId,
-                    Width = 80,
-                    Height = 50,
+                    Width = 150,
+                    Height = 80,
                     Margin = new Padding(5),
                     FlatStyle = FlatStyle.Flat,
                     BackColor = Color.AntiqueWhite,
