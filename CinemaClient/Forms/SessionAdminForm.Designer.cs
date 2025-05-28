@@ -32,6 +32,8 @@
             label1 = new Label();
             sessionList = new DataGridView();
             groupBox1 = new GroupBox();
+            comboFilm = new ComboBox();
+            comboHall = new ComboBox();
             takeTime = new DateTimePicker();
             delButton = new Button();
             otmenButton = new Button();
@@ -42,8 +44,6 @@
             label4 = new Label();
             label3 = new Label();
             label2 = new Label();
-            comboHall = new ComboBox();
-            comboFilm = new ComboBox();
             groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)sessionList).BeginInit();
             groupBox1.SuspendLayout();
@@ -101,6 +101,24 @@
             groupBox1.Size = new Size(1006, 401);
             groupBox1.TabIndex = 5;
             groupBox1.TabStop = false;
+            // 
+            // comboFilm
+            // 
+            comboFilm.BackColor = Color.Pink;
+            comboFilm.FormattingEnabled = true;
+            comboFilm.Location = new Point(293, 153);
+            comboFilm.Name = "comboFilm";
+            comboFilm.Size = new Size(329, 33);
+            comboFilm.TabIndex = 18;
+            // 
+            // comboHall
+            // 
+            comboHall.BackColor = Color.Pink;
+            comboHall.FormattingEnabled = true;
+            comboHall.Location = new Point(293, 67);
+            comboHall.Name = "comboHall";
+            comboHall.Size = new Size(329, 33);
+            comboHall.TabIndex = 17;
             // 
             // takeTime
             // 
@@ -211,24 +229,6 @@
             label2.Size = new Size(81, 39);
             label2.TabIndex = 2;
             label2.Text = "Сеанс";
-            // 
-            // comboHall
-            // 
-            comboHall.BackColor = Color.Pink;
-            comboHall.FormattingEnabled = true;
-            comboHall.Location = new Point(293, 67);
-            comboHall.Name = "comboHall";
-            comboHall.Size = new Size(329, 33);
-            comboHall.TabIndex = 17;
-            // 
-            // comboFilm
-            // 
-            comboFilm.BackColor = Color.Pink;
-            comboFilm.FormattingEnabled = true;
-            comboFilm.Location = new Point(293, 153);
-            comboFilm.Name = "comboFilm";
-            comboFilm.Size = new Size(329, 33);
-            comboFilm.TabIndex = 18;
             // 
             // SessionAdminForm
             // 
