@@ -19,6 +19,9 @@ namespace CinemaClient.Forms
 
             SetupEventHandlers();
             LoadMovieList();
+
+            this.Resize += (sender, e) => AdjustDataGridViewLayout();
+            filmList.SizeChanged += (sender, e) => AdjustDataGridViewLayout();
         }
 
         private void SetupEventHandlers()
@@ -77,6 +80,7 @@ namespace CinemaClient.Forms
                 }
 
                 ResetFormFields();
+                AdjustDataGridViewLayout();
             }
             catch (Exception ex)
             {
@@ -204,5 +208,39 @@ namespace CinemaClient.Forms
                 }
             }
         }
+
+        private void AdjustDataGridViewLayout()
+        {
+            // Проверяем, есть ли данные и столбцы
+            if (filmList.Rows.Count == 0 || filmList.Columns.Count == 0)
+                return;
+
+            // Рассчитываем высоту строки (общая высота / количество строк)
+            int rowHeight = filmList.Height / filmList.Rows.Count;
+
+            // Устанавливаем высоту для всех строк
+            foreach (DataGridViewRow row in filmList.Rows)
+            {
+                row.Height = rowHeight;
+            }
+
+            // Рассчитываем ширину столбца (общая ширина / количество видимых столбцов)
+            int visibleColumnsCount = filmList.Columns.Cast<DataGridViewColumn>()
+                                              .Count(c => c.Visible);
+            if (visibleColumnsCount == 0) return;
+
+            int columnWidth = filmList.Width / visibleColumnsCount;
+
+            // Устанавливаем ширину для всех видимых столбцов
+            foreach (DataGridViewColumn column in filmList.Columns)
+            {
+                if (column.Visible)
+                {
+                    column.Width = columnWidth;
+                }
+            }
+        }
     }
+
+
 }

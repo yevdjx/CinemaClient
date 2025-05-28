@@ -95,10 +95,10 @@ public class ApiService
     {
         var movie = new
         {
-            MovieTitle = title,
-            DurationMinutes = durationMinutes,
-            MovieAuthor = director,
-            MovieAgeRating = ageRestriction
+            movieTitle = title,
+            movieDuration = durationMinutes,
+            movieAuthor = director,
+            movieAgeRating = ageRestriction
         };
 
         var response = await _http.PostAsJsonAsync("/admin/movies", movie);
