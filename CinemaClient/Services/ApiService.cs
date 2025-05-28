@@ -85,25 +85,6 @@ public class ApiService
         => (await _http.PostAsJsonAsync("/booking/buy", new { ticketId }))
            .StatusCode == System.Net.HttpStatusCode.OK ? 0 : -1;
 
-    //public async Task<IEnumerable<UserDto>> GetUsersAsync()
-    //=> await _http.GetFromJsonAsync<IEnumerable<UserDto>>("/users")!;
-
-    //public async Task<bool> DeleteUserAsync(int userId)
-    //{
-    //    var response = await _http.DeleteAsync($"/users/{userId}");
-    //    return response.IsSuccessStatusCode;
-    //}
-
-    public async Task<IEnumerable<UserDto>> GetUsersAsync()
-    => await _http.GetFromJsonAsync<IEnumerable<UserDto>>("/admin/users")!;
-
-    public async Task<bool> DeleteUserAsync(int userId)
-    {
-        var resp = await _http.DeleteAsync($"/admin/users/{userId}");
-        return resp.IsSuccessStatusCode;
-    }
-
-
     private record LoginResponse(string Token);
 }
 
