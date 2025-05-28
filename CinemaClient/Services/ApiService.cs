@@ -166,7 +166,7 @@ public class ApiService
 }
 
 public record SessionDto(int SessionId, DateTime SessionDateTime,
-                         string HallNumber, string MovieTitle, decimal Price);
+                         string HallNumber, string MovieTitle, byte[] MovieImage, decimal Price);
 
 public record SeatDto(int TicketId, int Row, int Number, string Status);
 
