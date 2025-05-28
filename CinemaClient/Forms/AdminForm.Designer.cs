@@ -30,7 +30,7 @@
         {
             menuStrip1 = new MenuStrip();
             chFilm = new ToolStripMenuItem();
-            chOtmena = new ToolStripMenuItem();
+            sessionWork = new ToolStripMenuItem();
             chTicketSostoyanie = new ToolStripMenuItem();
             label1 = new Label();
             label2 = new Label();
@@ -41,7 +41,7 @@
             // menuStrip1
             // 
             menuStrip1.ImageScalingSize = new Size(24, 24);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { chFilm, chOtmena, chTicketSostoyanie });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { chFilm, sessionWork, chTicketSostoyanie });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(724, 32);
@@ -58,16 +58,16 @@
             chFilm.Text = "Фильмы";
             chFilm.Click += chFilm_Click;
             // 
-            // chOtmena
+            // sessionWork
             // 
-            chOtmena.BackColor = Color.PaleVioletRed;
-            chOtmena.Font = new Font("Bahnschrift", 9F);
-            chOtmena.ForeColor = Color.Black;
-            chOtmena.Name = "chOtmena";
-            chOtmena.Size = new Size(208, 28);
-            chOtmena.Text = "Отмена брони/билета";
-            chOtmena.TextDirection = ToolStripTextDirection.Horizontal;
-            chOtmena.Click += chOtmena_Click;
+            sessionWork.BackColor = Color.PaleVioletRed;
+            sessionWork.Font = new Font("Bahnschrift", 9F);
+            sessionWork.ForeColor = Color.Black;
+            sessionWork.Name = "sessionWork";
+            sessionWork.Size = new Size(89, 28);
+            sessionWork.Text = "Сеансы";
+            sessionWork.TextDirection = ToolStripTextDirection.Horizontal;
+            sessionWork.Click += sessionWork_Click;
             // 
             // chTicketSostoyanie
             // 
@@ -137,7 +137,7 @@
 
         private MenuStrip menuStrip1;
         private ToolStripMenuItem chFilm;
-        private ToolStripMenuItem chOtmena;
+        private ToolStripMenuItem sessionWork;
         private ToolStripMenuItem chTicketSostoyanie;
         private Label label1;
         private Label label2;

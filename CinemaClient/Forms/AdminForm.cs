@@ -20,7 +20,7 @@ namespace CinemaClient.Forms
             _api = api;
         }
 
-        private void chOtmena_Click(object sender, EventArgs e)
+        private void sessionWork_Click(object sender, EventArgs e)
         {
 
         }
