@@ -116,7 +116,7 @@ namespace CinemaClient.Forms
                     Tag = seat,
                     Font = new Font("Bahnschrift", 8, FontStyle.Bold),
                     BackColor = Color.PaleVioletRed,
-                    ForeColor = Color.White,
+                    ForeColor = Color.Maroon,
                     FlatAppearance = { BorderColor = Color.DeepPink, BorderSize = 1 }
                 };
 
@@ -166,10 +166,24 @@ namespace CinemaClient.Forms
             bookButton.Click += BookSelectedSeats_Click;
             mainPanel.Controls.Add(bookButton);
 
+            var buyButton = new Button
+            {
+                Dock = DockStyle.Bottom,
+                Height = 50,
+                Text = "Купить выбранные места",
+                BackColor = Color.DeepPink,
+                ForeColor = Color.White,
+                Font = new Font("Bahnschrift", 10, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                FlatAppearance = { BorderSize = 0 }
+            };
+            bookButton.Click += BuySelectedSeats_Click;
+            mainPanel.Controls.Add(buyButton);
+
             // Добавляем элементы легенды
-            AddLegendItem(legendPanel, "Обычные места (280 руб.)", Color.PaleVioletRed, 20);
-            AddLegendItem(legendPanel, "Выбранные места", Color.MediumVioletRed, 180);
-            AddLegendItem(legendPanel, "Занятые места", Color.LightGray, 340);
+            AddLegendItem(legendPanel, "Бронь", Color.PaleVioletRed, 20);
+            AddLegendItem(legendPanel, "Выбрано", Color.MediumVioletRed, 180);
+            AddLegendItem(legendPanel, "Куплено", Color.LightGray, 340);
 
             // Обработчики изменения размера
             this.Resize += (s, ev) => CenterSeatsTable();
@@ -270,6 +284,16 @@ namespace CinemaClient.Forms
             {
                 MessageBox.Show("Некоторые места не удалось забронировать.", "Внимание",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private async void BuySelectedSeats_Click(object sender, EventArgs e)
+        {
+            if (_selectedSeats.Count == 0)
+            {
+                MessageBox.Show("Выберите хотя бы одно место!", "Внимание",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
         }
     }
