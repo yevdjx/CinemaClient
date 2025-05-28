@@ -32,6 +32,8 @@
             label1 = new Label();
             label2 = new Label();
             groupBox1 = new GroupBox();
+            addPoster = new Button();
+            pictureBox1 = new PictureBox();
             deleteButton = new Button();
             changeButton = new Button();
             saveButton = new Button();
@@ -44,12 +46,10 @@
             label4 = new Label();
             label3 = new Label();
             groupBox2 = new GroupBox();
-            pictureBox1 = new PictureBox();
-            addPoster = new Button();
             ((System.ComponentModel.ISupportInitialize)filmList).BeginInit();
             groupBox1.SuspendLayout();
-            groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            groupBox2.SuspendLayout();
             SuspendLayout();
             // 
             // filmList
@@ -107,6 +107,29 @@
             groupBox1.Size = new Size(977, 490);
             groupBox1.TabIndex = 3;
             groupBox1.TabStop = false;
+            // 
+            // addPoster
+            // 
+            addPoster.BackColor = Color.MistyRose;
+            addPoster.Font = new Font("Bahnschrift SemiBold Condensed", 12F, FontStyle.Bold);
+            addPoster.ForeColor = Color.Maroon;
+            addPoster.Location = new Point(748, 385);
+            addPoster.Name = "addPoster";
+            addPoster.Size = new Size(209, 67);
+            addPoster.TabIndex = 16;
+            addPoster.Text = "Загрузить постер";
+            addPoster.UseVisualStyleBackColor = false;
+            addPoster.Click += addPoster_Click;
+            // 
+            // pictureBox1
+            // 
+            pictureBox1.BackColor = Color.PaleVioletRed;
+            pictureBox1.Location = new Point(758, 61);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(185, 265);
+            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBox1.TabIndex = 15;
+            pictureBox1.TabStop = false;
             // 
             // deleteButton
             // 
@@ -238,28 +261,6 @@
             groupBox2.TabIndex = 4;
             groupBox2.TabStop = false;
             // 
-            // pictureBox1
-            // 
-            pictureBox1.BackColor = Color.PaleVioletRed;
-            pictureBox1.Location = new Point(758, 61);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(185, 265);
-            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
-            pictureBox1.TabIndex = 15;
-            pictureBox1.TabStop = false;
-            // 
-            // addPoster
-            // 
-            addPoster.BackColor = Color.MistyRose;
-            addPoster.Font = new Font("Bahnschrift SemiBold Condensed", 12F, FontStyle.Bold);
-            addPoster.ForeColor = Color.Maroon;
-            addPoster.Location = new Point(748, 385);
-            addPoster.Name = "addPoster";
-            addPoster.Size = new Size(209, 67);
-            addPoster.TabIndex = 16;
-            addPoster.Text = "Загрузить постер";
-            addPoster.UseVisualStyleBackColor = false;
-            // 
             // FilmForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -273,9 +274,9 @@
             ((System.ComponentModel.ISupportInitialize)filmList).EndInit();
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             groupBox2.ResumeLayout(false);
             groupBox2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
         }
 

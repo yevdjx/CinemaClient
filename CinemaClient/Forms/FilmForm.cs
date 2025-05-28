@@ -177,7 +177,8 @@ namespace CinemaClient.Forms
                 takeFilmName.Text,
                 int.Parse(takeProd.Text),
                 takeDir.Text,
-                takeAge.Text);
+                takeAge.Text,
+                pictureBox1.Image);
         }
 
         private void OnCancelClicked(object sender, EventArgs e)
@@ -239,6 +240,11 @@ namespace CinemaClient.Forms
                     column.Width = columnWidth;
                 }
             }
+        }
+
+        private void addPoster_Click(object sender, EventArgs e)
+        {
+
         }
     }
 

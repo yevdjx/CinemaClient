@@ -153,14 +153,18 @@ public class ApiService
     string title,
     int durationMinutes,
     string director,
-    string ageRestriction)
+    string ageRestriction,
+    byte[] Img
+        )
     {
         var movie = new
         {
             movieTitle = title,
             movieDuration = durationMinutes,
             movieAuthor = director,
-            movieAgeRating = ageRestriction
+            movieAgeRating = ageRestriction,
+            Img = Img
+
         };
 
         var response = await _http.PostAsJsonAsync("/admin/movies", movie);
@@ -310,6 +314,7 @@ public record MovieDto(
     string movieTitle,
     int movieDuration,
     string movieAuthor,
-    string movieAgeRating
+    string movieAgeRating,
+    byte[] Img
 );
 
