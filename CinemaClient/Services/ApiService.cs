@@ -147,6 +147,72 @@ public class ApiService
         var error = await response.Content.ReadAsStringAsync();
         return (false, $"Ошибка: {response.StatusCode} - {error}");
     }
+    // КИНА НЕ БУДЕТ ФИЛЬМЫ ЗАКОНЧИЛИСЬ 
+
+    // а теперь сеансы!!
+    // Обновление существующего сеанса
+    public async Task<(bool Success, string? Error)> UpdateSessionAsync(
+        int sessionId,
+        string hallNumber,
+        string movieTitle,
+        DateTime sessionDateTime,
+        decimal price)
+    {
+        var session = new
+        {
+            SessionId = sessionId,
+            HallNumber = hallNumber,
+            MovieTitle = movieTitle,
+            SessionDateTime = sessionDateTime,
+            Price = price
+        };
+
+        var response = await _http.PutAsJsonAsync($"/admin/sessions/{sessionId}", session);
+
+        if (response.IsSuccessStatusCode)
+            return (true, null);
+
+        var error = await response.Content.ReadAsStringAsync();
+        return (false, $"Ошибка: {response.StatusCode} - {error}");
+    }
+
+    // Создание нового сеанса
+    public async Task<(bool Success, string? Error)> CreateSessionAsync(
+        string hallNumber,
+        string movieTitle,
+        DateTime sessionDateTime,
+        decimal price)
+    {
+        var session = new
+        {
+            HallNumber = hallNumber,
+            MovieTitle = movieTitle,
+            SessionDateTime = sessionDateTime,
+            Price = price
+        };
+
+        var response = await _http.PostAsJsonAsync("/admin/sessions", session);
+
+        if (response.IsSuccessStatusCode)
+            return (true, null);
+
+        var error = await response.Content.ReadAsStringAsync();
+        return (false, $"Ошибка: {response.StatusCode} - {error}");
+    }
+
+    // Удаление сеанса
+    public async Task<(bool Success, string? Error)> DeleteSessionAsync(int sessionId)
+    {
+        var response = await _http.DeleteAsync($"/admin/sessions/{sessionId}");
+
+        if (response.IsSuccessStatusCode)
+            return (true, null);
+
+        var error = await response.Content.ReadAsStringAsync();
+        return (false, $"Ошибка: {response.StatusCode} - {error}");
+    }
+
+
 
     public async Task<IEnumerable<SessionDto>> GetSessionsAsync()
         => await _http.GetFromJsonAsync<IEnumerable<SessionDto>>("/sessions")!;
