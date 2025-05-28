@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http;
 
 
 namespace CinemaClient.Services;
@@ -32,7 +33,68 @@ public class ApiService
         // доверяем self-signed, если вдруг понадобится:
         // ServicePointManager.ServerCertificateValidationCallback += (_,_,_,_) => true;
     }
+    public async Task<bool> ConfirmBookingAsync(int ticketId)
+    {
+        var response = await _http.PostAsync($"api/tickets/{ticketId}/confirm", null);
+        return response.IsSuccessStatusCode;
+    }
 
+    public async Task<string> GetUserEmailAsync()
+    {
+        var response = await _http.GetAsync("api/user/email");
+        return response.IsSuccessStatusCode ? await response.Content.ReadAsStringAsync() : null;
+    }
+
+    public async Task<string> GetUserNameAsync()
+    {
+        var response = await _http.GetAsync("api/user/name");
+        return response.IsSuccessStatusCode ? await response.Content.ReadAsStringAsync() : "Гость";
+    }
+    public async Task<SessionDto> GetSessionAsync(int sessionId)
+    {
+        try
+        {
+            var response = await _http.GetAsync($"api/sessions/{sessionId}");
+            if (response.IsSuccessStatusCode)
+            {
+                var session = await response.Content.ReadFromJsonAsync<SessionDto>();
+
+                // Если время приходит в формате DateTime, преобразуем в строку
+                if (session != null)
+                {
+                    // Пример преобразования, если нужно:
+                    // session.StartTime = session.StartTimeDateTime.ToString("HH:mm");
+                    // session.EndTime = session.EndTimeDateTime.ToString("HH:mm");
+                }
+
+                return session;
+            }
+            return null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка при получении информации о сеансе: {ex.Message}");
+            return null;
+        }
+    }
+
+    public async Task<byte[]> GetMovieImageAsync(int movieId)
+    {
+        try
+        {
+            var response = await _http.GetAsync($"api/movies/{movieId}/image");
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsByteArrayAsync();
+            }
+            return null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка при получении изображения фильма: {ex.Message}");
+            return null;
+        }
+    }
     public async Task<bool> LoginAsync(string login, string password)
     {
         var resp = await _http.PostAsJsonAsync("/auth/login", new { login, password });

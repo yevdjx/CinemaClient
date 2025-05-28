@@ -5,6 +5,8 @@ using System.Net;
 using System.Net.Mail;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
+using System.Configuration;
+
 
 namespace CinemaClient.Services
 {
@@ -164,38 +166,55 @@ namespace CinemaClient.Services
         public void SendEmailWithTicket(string recipientEmail, byte[] ticketPdf,
                                       string movieTitle, string customerName)
         {
+            if (string.IsNullOrWhiteSpace(recipientEmail))
+                throw new ArgumentException("Email адрес не может быть пустым");
+
             try
             {
-                // Настройки SMTP (замените на реальные)
-                using (var smtpClient = new SmtpClient("smtp.yandex.ru")
+                var smtpSettings = ConfigurationManager.AppSettings;
+
+                using (var smtpClient = new SmtpClient(smtpSettings["SmtpHost"])
                 {
-                    Port = 587,
-                    Credentials = new NetworkCredential("your_email@yandex.ru", "your_password"), // Замените на ваши учетные данные
-                    EnableSsl = true,
+                    Port = int.Parse(smtpSettings["SmtpPort"]),
+                    Credentials = new NetworkCredential(
+                        smtpSettings["SmtpUsername"],
+                        smtpSettings["SmtpPassword"]),
+                    EnableSsl = bool.Parse(smtpSettings["SmtpEnableSsl"]),
+                    DeliveryMethod = SmtpDeliveryMethod.Network
                 })
                 {
                     var mailMessage = new MailMessage
                     {
-                        From = new MailAddress("your_email@yandex.ru"), // Замените на ваш email отправителя
-                        Subject = $"Ваши билеты на фильм {movieTitle}",
-                        Body = $"Уважаемый(ая) {customerName},\n\nВаши билеты прикреплены к этому письму.\n\nПриятного просмотра!",
+                        From = new MailAddress(smtpSettings["SmtpFromEmail"],
+                                              smtpSettings["SmtpFromName"]),
+                        Subject = $"Ваши билеты на фильм «{movieTitle}»",
+                        Body = $"Уважаемый(ая) {customerName},\n\n" +
+                               "Ваши электронные билеты прикреплены к этому письму.\n\n" +
+                               $"Фильм: {movieTitle}\n" +
+                               "Пожалуйста, сохраните это письмо до посещения кинотеатра.\n\n" +
+                               "Приятного просмотра!",
                         IsBodyHtml = false,
                     };
 
                     mailMessage.To.Add(recipientEmail);
 
+                    // Add PDF attachment
                     using (var pdfStream = new MemoryStream(ticketPdf))
                     {
-                        mailMessage.Attachments.Add(new Attachment(pdfStream, $"Билет_{movieTitle}.pdf"));
+                        mailMessage.Attachments.Add(
+                            new Attachment(pdfStream,
+                                         $"Билет_{movieTitle}_{DateTime.Now:yyyyMMdd}.pdf",
+                                         "application/pdf"));
+
                         smtpClient.Send(mailMessage);
                     }
                 }
             }
             catch (Exception ex)
             {
-                // Для отладки: выведите сообщение об ошибке в консоль или лог
-                Console.WriteLine($"Ошибка при отправке email: {ex.Message}");
-                throw new Exception("Ошибка при отправке email: " + ex.Message);
+                // Log error (in real app use proper logging)
+                Console.WriteLine($"Ошибка отправки email: {ex}");
+                throw new ApplicationException("Не удалось отправить билеты на email. Пожалуйста, проверьте ваш email адрес и повторите попытку.", ex);
             }
         }
     }
