@@ -270,7 +270,6 @@
             Controls.Add(groupBox1);
             Name = "FilmForm";
             Text = "Редактирование списка фильмов";
-            Load += FilmForm_Load;
             ((System.ComponentModel.ISupportInitialize)filmList).EndInit();
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();

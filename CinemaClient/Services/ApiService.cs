@@ -88,17 +88,17 @@ public class ApiService
 
     // Создание нового фильма
     public async Task<(bool Success, string? Error)> CreateMovieAsync(
-        string title,
-        int durationMinutes,
-        string director,
-        string ageRestriction)
+    string title,
+    int durationMinutes,
+    string director,
+    string ageRestriction)
     {
         var movie = new
         {
-            Title = title,
+            MovieTitle = title,
             DurationMinutes = durationMinutes,
-            Director = director,
-            AgeRestriction = ageRestriction
+            MovieAuthor = director,
+            MovieAgeRating = ageRestriction
         };
 
         var response = await _http.PostAsJsonAsync("/admin/movies", movie);
@@ -110,7 +110,6 @@ public class ApiService
         return (false, $"Ошибка: {response.StatusCode} - {error}");
     }
 
-    // Обновление существующего фильма
     public async Task<(bool Success, string? Error)> UpdateMovieAsync(
         int movieId,
         string title,
@@ -120,11 +119,11 @@ public class ApiService
     {
         var movie = new
         {
-            MovieId = movieId,
-            Title = title,
-            DurationMinutes = durationMinutes,
-            Director = director,
-            AgeRestriction = ageRestriction
+            movieId = movieId,
+            movieTitle = title,
+            movieDuration = durationMinutes,
+            movieAuthor = director,
+            movieAgeRating = ageRestriction
         };
 
         var response = await _http.PutAsJsonAsync($"/admin/movies/{movieId}", movie);
@@ -135,6 +134,7 @@ public class ApiService
         var error = await response.Content.ReadAsStringAsync();
         return (false, $"Ошибка: {response.StatusCode} - {error}");
     }
+
 
     // Удаление фильма
     public async Task<(bool Success, string? Error)> DeleteMovieAsync(int movieId)
