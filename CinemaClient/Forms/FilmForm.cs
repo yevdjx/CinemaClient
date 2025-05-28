@@ -104,6 +104,16 @@ namespace CinemaClient.Forms
             takeProd.Text = selectedMovie.movieDuration.ToString();
             takeDir.Text = selectedMovie.movieAuthor ?? string.Empty;
             takeAge.Text = selectedMovie.movieAgeRating ?? string.Empty;
+
+            if (selectedMovie.movieImg != null && selectedMovie.movieImg.Length > 0)
+            {
+                using var ms = new MemoryStream(selectedMovie.movieImg);
+                pictureBox1.Image = Image.FromStream(ms);
+            }
+            else
+            {
+                MessageBox.Show("sosite");
+            }
         }
 
         private async void OnSaveClicked(object sender, EventArgs e)
@@ -246,9 +256,48 @@ namespace CinemaClient.Forms
 
         private void addPoster_Click(object sender, EventArgs e)
         {
+            try
+            {
+                // Настройка диалога открытия файла
+                using (OpenFileDialog openFileDialog = new OpenFileDialog())
+                {
+                    openFileDialog.Filter = "JPEG Images|*.jpg;*.jpeg";
+                    openFileDialog.Title = "Выберите JPEG-изображение";
 
+                    if (openFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        string filePath = openFileDialog.FileName;
+
+                        // Проверка расширения файла (опционально)
+                        if (!filePath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) &&
+                            !filePath.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
+                        {
+                            MessageBox.Show("Пожалуйста, выберите файл в формате JPEG (.jpg или .jpeg).", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+
+                        // Загрузка изображения
+                        Image image = Image.FromFile(filePath);
+                        pictureBox1.Image?.Dispose(); // Освобождаем предыдущее изображение
+                        pictureBox1.Image = image;
+                    }
+                }
+            }
+            catch (OutOfMemoryException)
+            {
+                MessageBox.Show("Файл не является допустимым изображением или поврежден.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (FileNotFoundException)
+            {
+                MessageBox.Show("Файл не найден.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Произошла ошибка: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
+
+        // Освобождаем ресурсы при закрытии формы
+
     }
-
-
-}
+    }
