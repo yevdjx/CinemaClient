@@ -27,7 +27,8 @@ namespace CinemaClient.Forms
 
         private void chFilm_Click(object sender, EventArgs e)
         {
-
+            var f = new FilmForm(_api);   // передаём тот же ApiService
+            f.ShowDialog(this);
         }
     }
 }

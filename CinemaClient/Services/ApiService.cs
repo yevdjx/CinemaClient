@@ -69,6 +69,83 @@ public class ApiService
             HttpStatusCode.BadRequest => "Пароли не совпадают",
             _ => $"Сервер вернул ошибку: {msg}"
         };
+
+    }
+
+    // ФИЛЬМЫ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// Получение всех фильмов
+    public async Task<IEnumerable<MovieDto>> GetMoviesAsync()
+    {
+        return await _http.GetFromJsonAsync<IEnumerable<MovieDto>>("/admin/movies")
+               ?? Enumerable.Empty<MovieDto>();
+    }
+
+    // Получение одного фильма по ID
+    public async Task<MovieDto?> GetMovieAsync(int movieId)
+    {
+        return await _http.GetFromJsonAsync<MovieDto>($"/admin/movies/{movieId}");
+    }
+
+    // Создание нового фильма
+    public async Task<(bool Success, string? Error)> CreateMovieAsync(
+        string title,
+        int durationMinutes,
+        string director,
+        string ageRestriction)
+    {
+        var movie = new
+        {
+            Title = title,
+            DurationMinutes = durationMinutes,
+            Director = director,
+            AgeRestriction = ageRestriction
+        };
+
+        var response = await _http.PostAsJsonAsync("/admin/movies", movie);
+
+        if (response.IsSuccessStatusCode)
+            return (true, null);
+
+        var error = await response.Content.ReadAsStringAsync();
+        return (false, $"Ошибка: {response.StatusCode} - {error}");
+    }
+
+    // Обновление существующего фильма
+    public async Task<(bool Success, string? Error)> UpdateMovieAsync(
+        int movieId,
+        string title,
+        int durationMinutes,
+        string director,
+        string ageRestriction)
+    {
+        var movie = new
+        {
+            MovieId = movieId,
+            Title = title,
+            DurationMinutes = durationMinutes,
+            Director = director,
+            AgeRestriction = ageRestriction
+        };
+
+        var response = await _http.PutAsJsonAsync($"/admin/movies/{movieId}", movie);
+
+        if (response.IsSuccessStatusCode)
+            return (true, null);
+
+        var error = await response.Content.ReadAsStringAsync();
+        return (false, $"Ошибка: {response.StatusCode} - {error}");
+    }
+
+    // Удаление фильма
+    public async Task<(bool Success, string? Error)> DeleteMovieAsync(int movieId)
+    {
+        var response = await _http.DeleteAsync($"/admin/movies/{movieId}");
+
+        if (response.IsSuccessStatusCode)
+            return (true, null);
+
+        var error = await response.Content.ReadAsStringAsync();
+        return (false, $"Ошибка: {response.StatusCode} - {error}");
     }
 
     public async Task<IEnumerable<SessionDto>> GetSessionsAsync()
@@ -98,5 +175,13 @@ public record UserDto(
     string Login,
     string Role,
     byte[] PasswordHash
+);
+
+public record MovieDto(
+    int movieId,
+    string movieTitle,
+    int movieDuration,
+    string movieAuthor,
+    string movieAgeRating
 );
 

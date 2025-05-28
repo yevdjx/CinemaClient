@@ -32,21 +32,24 @@
             label1 = new Label();
             label2 = new Label();
             groupBox1 = new GroupBox();
-            groupBox2 = new GroupBox();
-            label3 = new Label();
-            label4 = new Label();
-            label5 = new Label();
-            label6 = new Label();
-            takeFilmName = new TextBox();
-            textBox1 = new TextBox();
-            textBox3 = new TextBox();
-            textBox4 = new TextBox();
-            saveButton = new Button();
-            changeButton = new Button();
             deleteButton = new Button();
+            changeButton = new Button();
+            saveButton = new Button();
+            takeAge = new TextBox();
+            takeDir = new TextBox();
+            takeProd = new TextBox();
+            takeFilmName = new TextBox();
+            label6 = new Label();
+            label5 = new Label();
+            label4 = new Label();
+            label3 = new Label();
+            groupBox2 = new GroupBox();
+            pictureBox1 = new PictureBox();
+            addPoster = new Button();
             ((System.ComponentModel.ISupportInitialize)filmList).BeginInit();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
             // filmList
@@ -54,11 +57,11 @@
             filmList.BackgroundColor = Color.BlanchedAlmond;
             filmList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             filmList.ColumnHeadersVisible = false;
-            filmList.Location = new Point(25, 59);
+            filmList.Location = new Point(25, 64);
             filmList.Name = "filmList";
             filmList.RowHeadersVisible = false;
             filmList.RowHeadersWidth = 62;
-            filmList.Size = new Size(954, 274);
+            filmList.Size = new Size(954, 142);
             filmList.TabIndex = 0;
             // 
             // label1
@@ -85,12 +88,14 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(addPoster);
+            groupBox1.Controls.Add(pictureBox1);
             groupBox1.Controls.Add(deleteButton);
             groupBox1.Controls.Add(changeButton);
             groupBox1.Controls.Add(saveButton);
-            groupBox1.Controls.Add(textBox4);
-            groupBox1.Controls.Add(textBox3);
-            groupBox1.Controls.Add(textBox1);
+            groupBox1.Controls.Add(takeAge);
+            groupBox1.Controls.Add(takeDir);
+            groupBox1.Controls.Add(takeProd);
             groupBox1.Controls.Add(takeFilmName);
             groupBox1.Controls.Add(label6);
             groupBox1.Controls.Add(label5);
@@ -99,52 +104,85 @@
             groupBox1.Controls.Add(label2);
             groupBox1.Location = new Point(17, 13);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(977, 363);
+            groupBox1.Size = new Size(977, 490);
             groupBox1.TabIndex = 3;
             groupBox1.TabStop = false;
             // 
-            // groupBox2
+            // deleteButton
             // 
-            groupBox2.Controls.Add(label1);
-            groupBox2.Controls.Add(filmList);
-            groupBox2.Location = new Point(15, 391);
-            groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(1006, 352);
-            groupBox2.TabIndex = 4;
-            groupBox2.TabStop = false;
+            deleteButton.BackColor = Color.MistyRose;
+            deleteButton.Font = new Font("Bahnschrift SemiBold Condensed", 12F, FontStyle.Bold);
+            deleteButton.ForeColor = Color.Maroon;
+            deleteButton.Location = new Point(508, 385);
+            deleteButton.Name = "deleteButton";
+            deleteButton.Size = new Size(209, 67);
+            deleteButton.TabIndex = 14;
+            deleteButton.Text = "Удалить";
+            deleteButton.UseVisualStyleBackColor = false;
             // 
-            // label3
+            // changeButton
             // 
-            label3.AutoSize = true;
-            label3.Font = new Font("Bahnschrift Condensed", 14F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            label3.ForeColor = Color.DeepPink;
-            label3.Location = new Point(34, 80);
-            label3.Name = "label3";
-            label3.Size = new Size(102, 34);
-            label3.TabIndex = 3;
-            label3.Text = "Название";
+            changeButton.BackColor = Color.MistyRose;
+            changeButton.Font = new Font("Bahnschrift SemiBold Condensed", 12F, FontStyle.Bold);
+            changeButton.ForeColor = Color.Maroon;
+            changeButton.Location = new Point(266, 385);
+            changeButton.Name = "changeButton";
+            changeButton.Size = new Size(209, 67);
+            changeButton.TabIndex = 13;
+            changeButton.Text = "Отменить изменения";
+            changeButton.UseVisualStyleBackColor = false;
             // 
-            // label4
+            // saveButton
             // 
-            label4.AutoSize = true;
-            label4.Font = new Font("Bahnschrift Condensed", 14F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            label4.ForeColor = Color.DeepPink;
-            label4.Location = new Point(34, 148);
-            label4.Name = "label4";
-            label4.Size = new Size(199, 34);
-            label4.TabIndex = 4;
-            label4.Text = "Продолжительность";
+            saveButton.BackColor = Color.MistyRose;
+            saveButton.Font = new Font("Bahnschrift SemiBold Condensed", 12F, FontStyle.Bold);
+            saveButton.ForeColor = Color.Maroon;
+            saveButton.Location = new Point(24, 385);
+            saveButton.Name = "saveButton";
+            saveButton.Size = new Size(209, 67);
+            saveButton.TabIndex = 12;
+            saveButton.Text = "Сохранить";
+            saveButton.UseVisualStyleBackColor = false;
             // 
-            // label5
+            // takeAge
             // 
-            label5.AutoSize = true;
-            label5.Font = new Font("Bahnschrift Condensed", 14F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            label5.ForeColor = Color.DeepPink;
-            label5.Location = new Point(34, 215);
-            label5.Name = "label5";
-            label5.Size = new Size(107, 34);
-            label5.TabIndex = 5;
-            label5.Text = "Режиссер";
+            takeAge.BackColor = Color.Pink;
+            takeAge.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            takeAge.ForeColor = Color.Maroon;
+            takeAge.Location = new Point(293, 290);
+            takeAge.Name = "takeAge";
+            takeAge.Size = new Size(329, 36);
+            takeAge.TabIndex = 11;
+            // 
+            // takeDir
+            // 
+            takeDir.BackColor = Color.Pink;
+            takeDir.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            takeDir.ForeColor = Color.Maroon;
+            takeDir.Location = new Point(293, 216);
+            takeDir.Name = "takeDir";
+            takeDir.Size = new Size(329, 36);
+            takeDir.TabIndex = 10;
+            // 
+            // takeProd
+            // 
+            takeProd.BackColor = Color.Pink;
+            takeProd.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            takeProd.ForeColor = Color.Maroon;
+            takeProd.Location = new Point(293, 149);
+            takeProd.Name = "takeProd";
+            takeProd.Size = new Size(329, 36);
+            takeProd.TabIndex = 8;
+            // 
+            // takeFilmName
+            // 
+            takeFilmName.BackColor = Color.Pink;
+            takeFilmName.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            takeFilmName.ForeColor = Color.Maroon;
+            takeFilmName.Location = new Point(293, 80);
+            takeFilmName.Name = "takeFilmName";
+            takeFilmName.Size = new Size(329, 36);
+            takeFilmName.TabIndex = 7;
             // 
             // label6
             // 
@@ -157,81 +195,70 @@
             label6.TabIndex = 6;
             label6.Text = "Возрастное \r\nограничение";
             // 
-            // takeFilmName
+            // label5
             // 
-            takeFilmName.BackColor = Color.Pink;
-            takeFilmName.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            takeFilmName.ForeColor = Color.Maroon;
-            takeFilmName.Location = new Point(293, 80);
-            takeFilmName.Name = "takeFilmName";
-            takeFilmName.Size = new Size(329, 36);
-            takeFilmName.TabIndex = 7;
+            label5.AutoSize = true;
+            label5.Font = new Font("Bahnschrift Condensed", 14F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            label5.ForeColor = Color.DeepPink;
+            label5.Location = new Point(34, 215);
+            label5.Name = "label5";
+            label5.Size = new Size(107, 34);
+            label5.TabIndex = 5;
+            label5.Text = "Режиссер";
             // 
-            // textBox1
+            // label4
             // 
-            textBox1.BackColor = Color.Pink;
-            textBox1.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            textBox1.ForeColor = Color.Maroon;
-            textBox1.Location = new Point(293, 149);
-            textBox1.Name = "textBox1";
-            textBox1.Size = new Size(329, 36);
-            textBox1.TabIndex = 8;
+            label4.AutoSize = true;
+            label4.Font = new Font("Bahnschrift Condensed", 14F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            label4.ForeColor = Color.DeepPink;
+            label4.Location = new Point(34, 148);
+            label4.Name = "label4";
+            label4.Size = new Size(199, 34);
+            label4.TabIndex = 4;
+            label4.Text = "Продолжительность";
             // 
-            // textBox3
+            // label3
             // 
-            textBox3.BackColor = Color.Pink;
-            textBox3.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            textBox3.ForeColor = Color.Maroon;
-            textBox3.Location = new Point(293, 216);
-            textBox3.Name = "textBox3";
-            textBox3.Size = new Size(329, 36);
-            textBox3.TabIndex = 10;
+            label3.AutoSize = true;
+            label3.Font = new Font("Bahnschrift Condensed", 14F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            label3.ForeColor = Color.DeepPink;
+            label3.Location = new Point(34, 80);
+            label3.Name = "label3";
+            label3.Size = new Size(102, 34);
+            label3.TabIndex = 3;
+            label3.Text = "Название";
             // 
-            // textBox4
+            // groupBox2
             // 
-            textBox4.BackColor = Color.Pink;
-            textBox4.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            textBox4.ForeColor = Color.Maroon;
-            textBox4.Location = new Point(293, 290);
-            textBox4.Name = "textBox4";
-            textBox4.Size = new Size(329, 36);
-            textBox4.TabIndex = 11;
+            groupBox2.Controls.Add(label1);
+            groupBox2.Controls.Add(filmList);
+            groupBox2.Location = new Point(15, 524);
+            groupBox2.Name = "groupBox2";
+            groupBox2.Size = new Size(1006, 219);
+            groupBox2.TabIndex = 4;
+            groupBox2.TabStop = false;
             // 
-            // saveButton
+            // pictureBox1
             // 
-            saveButton.BackColor = Color.MistyRose;
-            saveButton.Font = new Font("Bahnschrift SemiBold Condensed", 12F, FontStyle.Bold);
-            saveButton.ForeColor = Color.Maroon;
-            saveButton.Location = new Point(722, 66);
-            saveButton.Name = "saveButton";
-            saveButton.Size = new Size(209, 67);
-            saveButton.TabIndex = 12;
-            saveButton.Text = "Сохранить";
-            saveButton.UseVisualStyleBackColor = false;
+            pictureBox1.BackColor = Color.PaleVioletRed;
+            pictureBox1.Location = new Point(758, 61);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(185, 265);
+            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBox1.TabIndex = 15;
+            pictureBox1.TabStop = false;
             // 
-            // changeButton
+            // addPoster
             // 
-            changeButton.BackColor = Color.MistyRose;
-            changeButton.Font = new Font("Bahnschrift SemiBold Condensed", 12F, FontStyle.Bold);
-            changeButton.ForeColor = Color.Maroon;
-            changeButton.Location = new Point(722, 167);
-            changeButton.Name = "changeButton";
-            changeButton.Size = new Size(209, 67);
-            changeButton.TabIndex = 13;
-            changeButton.Text = "Отменить изменения";
-            changeButton.UseVisualStyleBackColor = false;
-            // 
-            // deleteButton
-            // 
-            deleteButton.BackColor = Color.MistyRose;
-            deleteButton.Font = new Font("Bahnschrift SemiBold Condensed", 12F, FontStyle.Bold);
-            deleteButton.ForeColor = Color.Maroon;
-            deleteButton.Location = new Point(722, 276);
-            deleteButton.Name = "deleteButton";
-            deleteButton.Size = new Size(209, 67);
-            deleteButton.TabIndex = 14;
-            deleteButton.Text = "Удалить";
-            deleteButton.UseVisualStyleBackColor = false;
+            addPoster.BackColor = Color.MistyRose;
+            addPoster.Font = new Font("Bahnschrift SemiBold Condensed", 12F, FontStyle.Bold);
+            addPoster.ForeColor = Color.Maroon;
+            addPoster.Location = new Point(748, 385);
+            addPoster.Name = "addPoster";
+            addPoster.Size = new Size(209, 67);
+            addPoster.TabIndex = 16;
+            addPoster.Text = "Загрузить постер";
+            addPoster.UseVisualStyleBackColor = false;
             // 
             // FilmForm
             // 
@@ -249,6 +276,7 @@
             groupBox1.PerformLayout();
             groupBox2.ResumeLayout(false);
             groupBox2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
         }
 
@@ -267,8 +295,10 @@
         private Button deleteButton;
         private Button changeButton;
         private Button saveButton;
-        private TextBox textBox4;
-        private TextBox textBox3;
-        private TextBox textBox1;
+        private TextBox takeAge;
+        private TextBox takeDir;
+        private TextBox takeProd;
+        private Button addPoster;
+        private PictureBox pictureBox1;
     }
 }
