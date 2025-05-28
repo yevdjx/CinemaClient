@@ -78,6 +78,7 @@
             chTicketSostoyanie.Size = new Size(185, 28);
             chTicketSostoyanie.Text = "Состояние билетов";
             chTicketSostoyanie.TextDirection = ToolStripTextDirection.Horizontal;
+            chTicketSostoyanie.Click += chTicketSostoyanie_Click;
             // 
             // label1
             // 

@@ -168,7 +168,8 @@ namespace CinemaClient.Forms
                 takeFilmName.Text,
                 int.Parse(takeProd.Text),
                 takeDir.Text,
-                takeAge.Text);
+                takeAge.Text,
+                pictureBox1.Image == null ? null : (byte[])new ImageConverter().ConvertTo(pictureBox1.Image, typeof(byte[])));
         }
 
         private async Task<(bool Success, string? Error)> CreateNewMovie()
@@ -178,7 +179,8 @@ namespace CinemaClient.Forms
                 int.Parse(takeProd.Text),
                 takeDir.Text,
                 takeAge.Text,
-                pictureBox1.Image);
+                pictureBox1.Image == null ? null : (byte[])new ImageConverter().ConvertTo(pictureBox1.Image, typeof(byte[])));
+
         }
 
         private void OnCancelClicked(object sender, EventArgs e)
