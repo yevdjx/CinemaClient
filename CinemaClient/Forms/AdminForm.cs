@@ -22,7 +22,8 @@ namespace CinemaClient.Forms
 
         private void sessionWork_Click(object sender, EventArgs e)
         {
-
+            var fa = new SessionAdminForm(_api);   // передаём тот же ApiService
+            fa.ShowDialog(this);
         }
 
         private void chFilm_Click(object sender, EventArgs e)
