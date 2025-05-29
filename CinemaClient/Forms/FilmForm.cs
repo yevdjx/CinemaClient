@@ -88,7 +88,7 @@ namespace CinemaClient.Forms
             }
         }
 
-        private void OnFilmSelected(object sender, EventArgs e)
+        async private void OnFilmSelected(object sender, EventArgs e)
         {
             if (filmList.SelectedRows.Count == 0 ||
                 filmList.SelectedRows[0].Index < 0 ||
@@ -105,16 +105,27 @@ namespace CinemaClient.Forms
             takeDir.Text = selectedMovie.movieAuthor ?? string.Empty;
             takeAge.Text = selectedMovie.movieAgeRating ?? string.Empty;
 
-            if (selectedMovie.movieImg != null && selectedMovie.movieImg.Length > 0)
+            if (selectedMovie.movieImage != null && selectedMovie.movieImage.Length > 0)
             {
-                using var ms = new MemoryStream(selectedMovie.movieImg);
+                using var ms = new MemoryStream(selectedMovie.movieImage);
                 pictureBox1.Image = Image.FromStream(ms);
             }
             else
             {
-                MessageBox.Show("sosite");
+                Image image = await _api.GetMovieImageAsync((int)_currentMovieId);
+
+                if (image != null)
+                {
+                    pictureBox1.Image?.Dispose(); // Освобождаем предыдущее изображение
+                    pictureBox1.Image = image;
+                }
+                else
+                {
+                    MessageBox.Show("Не удалось загрузить изображение.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
+
 
         private async void OnSaveClicked(object sender, EventArgs e)
         {
@@ -179,7 +190,7 @@ namespace CinemaClient.Forms
                 int.Parse(takeProd.Text),
                 takeDir.Text,
                 takeAge.Text,
-                pictureBox1.Image == null ? null : (byte[])new ImageConverter().ConvertTo(pictureBox1.Image, typeof(byte[])));
+                PictureBoxImageToByteArray(pictureBox1)); 
         }
 
         private async Task<(bool Success, string? Error)> CreateNewMovie()
@@ -189,7 +200,7 @@ namespace CinemaClient.Forms
                 int.Parse(takeProd.Text),
                 takeDir.Text,
                 takeAge.Text,
-                pictureBox1.Image == null ? null : (byte[])new ImageConverter().ConvertTo(pictureBox1.Image, typeof(byte[])));
+                PictureBoxImageToByteArray(pictureBox1));
 
         }
 
@@ -296,8 +307,21 @@ namespace CinemaClient.Forms
                 MessageBox.Show($"Произошла ошибка: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        public static byte[] PictureBoxImageToByteArray(PictureBox pictureBox)
+        {
+            if (pictureBox.Image == null)
+            {
+                return null; // Возвращаем null, если изображение отсутствует
+            }
 
-        // Освобождаем ресурсы при закрытии формы
+            using (var ms = new MemoryStream())
+            {
+                // Сохраняем изображение из PictureBox в MemoryStream в формате JPEG
+                pictureBox.Image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                // Возвращаем массив байтов
+                return ms.ToArray();
+            }
+        }
 
     }
-    }
+}

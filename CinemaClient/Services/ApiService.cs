@@ -78,20 +78,31 @@ public class ApiService
         }
     }
 
-    public async Task<byte[]> GetMovieImageAsync(int movieId)
+
+    public async Task<Image> GetMovieImageAsync(int movieId)
     {
         try
         {
-            var response = await _http.GetAsync($"api/movies/{movieId}/image");
-            if (response.IsSuccessStatusCode)
+            var response = await _http.GetAsync($"api/movies/{movieId}/movie_image");
+            response.EnsureSuccessStatusCode();
+
+            // Получаем содержимое ответа в виде потока
+            using (var stream = await response.Content.ReadAsStreamAsync())
             {
-                return await response.Content.ReadAsByteArrayAsync();
+                // Преобразуем поток в изображение
+                return Image.FromStream(stream);
             }
+        }
+        catch (HttpRequestException ex)
+        {
+            // Обработка ошибок запроса
+            Console.WriteLine($"Ошибка при получении изображения: {ex.Message}");
             return null;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Ошибка при получении изображения фильма: {ex.Message}");
+            // Обработка других ошибок
+            Console.WriteLine($"Произошла ошибка: {ex.Message}");
             return null;
         }
     }
@@ -163,7 +174,7 @@ public class ApiService
             movieDuration = durationMinutes,
             movieAuthor = director,
             movieAgeRating = ageRestriction,
-            movieImg = Img
+            MovieImage = Img
 
         };
 
@@ -185,13 +196,13 @@ public class ApiService
     {
         var movie = new
         {
-            movieId = movieId,
+            movieId,
             movieTitle = title,
             movieDuration = durationMinutes,
             movieAuthor = director,
             movieAgeRating = ageRestriction,
-            movieImg = Img
-            
+            movieImage = Img
+
         };
 
         var response = await _http.PutAsJsonAsync($"/admin/movies/{movieId}", movie);
@@ -318,7 +329,7 @@ public record MovieDto(
     int movieDuration,
     string movieAuthor,
     string movieAgeRating,
-    byte[] movieImg
+    byte[] movieImage
 );
 
 public record KorzinaDto(
