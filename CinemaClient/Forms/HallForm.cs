@@ -38,6 +38,23 @@ namespace CinemaClient.Forms
             };
             this.Controls.Add(mainPanel);
 
+            var legendPanel = new Panel
+            {
+                Dock = DockStyle.Bottom,
+                Height = 60,
+                BackColor = Color.AntiqueWhite
+            };
+            mainPanel.Controls.Add(legendPanel);
+
+            var scrollPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                AutoScroll = true,
+                BackColor = Color.AntiqueWhite,
+                Padding = new Padding(20, 0, 20, 0)
+            };
+            mainPanel.Controls.Add(scrollPanel);
+
             var screenPanel = new Panel
             {
                 Dock = DockStyle.Top,
@@ -58,17 +75,9 @@ namespace CinemaClient.Forms
             };
             screenPanel.Controls.Add(screenLabel);
 
-            var scrollPanel = new Panel
-            {
-                Dock = DockStyle.Fill,
-                AutoScroll = true,
-                BackColor = Color.AntiqueWhite,
-                Padding = new Padding(20, 0, 20, 0)
-            };
-            mainPanel.Controls.Add(scrollPanel);
-
             seatsContainer = new Panel
             {
+                Dock = DockStyle.Top,
                 AutoSize = true,
                 AutoSizeMode = AutoSizeMode.GrowAndShrink,
                 BackColor = Color.AntiqueWhite,
@@ -90,7 +99,7 @@ namespace CinemaClient.Forms
                 Margin = new Padding(0, 30, 0, 20)
             };
 
-            int buttonSize = Math.Max(30, 400 / cols);
+            int buttonSize = Math.Max(30, 600 / cols);
             for (int i = 0; i < cols; i++)
                 seatsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, buttonSize));
             for (int i = 0; i < rows; i++)
@@ -118,13 +127,6 @@ namespace CinemaClient.Forms
                 seatsTable.Controls.Add(btn, seat.Number - 1, seat.Row - 1);
             }
 
-            var legendPanel = new Panel
-            {
-                Dock = DockStyle.Bottom,
-                Height = 60,
-                BackColor = Color.AntiqueWhite
-            };
-            mainPanel.Controls.Add(legendPanel);
 
             var buyButton = new Button
             {
@@ -327,7 +329,6 @@ namespace CinemaClient.Forms
                         var newSeat = oldSeat with { Status = "sold" };
                         btn.Tag = newSeat;
                         UpdateSeatButtonAppearance(btn);
-                        _selectedSeats.Remove(btn);
                     }
                 }
 
@@ -341,6 +342,7 @@ namespace CinemaClient.Forms
                 {
                     MessageBox.Show("Некоторые места не удалось купить.", "Внимание",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    _selectedSeats.Clear();
                 }
             }
             finally
