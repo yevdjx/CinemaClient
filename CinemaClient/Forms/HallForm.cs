@@ -14,6 +14,7 @@ namespace CinemaClient.Forms
         private readonly List<Button> _selectedSeats = new List<Button>();
         private TableLayoutPanel seatsTable;
         private Panel seatsContainer;
+        private bool _isProcessing = false;
 
         public HallForm(ApiService api, int sessionId, string movieTitle)
         {
@@ -30,7 +31,6 @@ namespace CinemaClient.Forms
 
         private async void HallForm_Load(object sender, EventArgs e)
         {
-            // Главный контейнер с правильной структурой
             var mainPanel = new Panel
             {
                 Dock = DockStyle.Fill,
@@ -38,7 +38,6 @@ namespace CinemaClient.Forms
             };
             this.Controls.Add(mainPanel);
 
-            // 1. Панель экрана (верхняя часть)
             var screenPanel = new Panel
             {
                 Dock = DockStyle.Top,
@@ -48,7 +47,6 @@ namespace CinemaClient.Forms
             };
             mainPanel.Controls.Add(screenPanel);
 
-            // Надпись "ЭКРАН"
             var screenLabel = new Label
             {
                 Text = "ЭКРАН",
@@ -60,7 +58,6 @@ namespace CinemaClient.Forms
             };
             screenPanel.Controls.Add(screenLabel);
 
-            // 2. Контейнер для мест с прокруткой
             var scrollPanel = new Panel
             {
                 Dock = DockStyle.Fill,
@@ -70,22 +67,19 @@ namespace CinemaClient.Forms
             };
             mainPanel.Controls.Add(scrollPanel);
 
-            // 3. Панель для таблицы мест
             seatsContainer = new Panel
             {
                 AutoSize = true,
                 AutoSizeMode = AutoSizeMode.GrowAndShrink,
                 BackColor = Color.AntiqueWhite,
-                MinimumSize = new Size(0, 300) // Минимальная высота
+                MinimumSize = new Size(0, 300)
             };
             scrollPanel.Controls.Add(seatsContainer);
 
-            // Загружаем данные о местах
             var seats = (await _api.GetSeatsAsync(_sessionId)).ToList();
-            int rows = seats.Max(s => s.Row);
-            int cols = seats.Max(s => s.Number);
+            int rows = seats.Max(s => s.Number);
+            int cols = seats.Max(s => s.Row);
 
-            // Создаем таблицу для мест
             seatsTable = new TableLayoutPanel
             {
                 AutoSize = true,
@@ -93,25 +87,24 @@ namespace CinemaClient.Forms
                 ColumnCount = cols,
                 RowCount = rows,
                 BackColor = Color.AntiqueWhite,
-                Margin = new Padding(0, 30, 0, 20) // Отступ сверху и снизу
+                Margin = new Padding(0, 30, 0, 20)
             };
 
-            // Настраиваем столбцы и строки
+            int buttonSize = Math.Max(30, 400 / cols);
             for (int i = 0; i < cols; i++)
-                seatsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 40));
+                seatsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, buttonSize));
             for (int i = 0; i < rows; i++)
-                seatsTable.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
+                seatsTable.RowStyles.Add(new RowStyle(SizeType.Absolute, buttonSize));
 
             seatsContainer.Controls.Add(seatsTable);
             CenterSeatsTable();
 
-            // Создаем кнопки мест
             foreach (var seat in seats)
             {
                 var btn = new Button
                 {
-                    Text = seat.Number.ToString(),
-                    Size = new Size(35, 35),
+                    Text = $"{seat.Number}",
+                    Size = new Size(buttonSize - 5, buttonSize - 5),
                     FlatStyle = FlatStyle.Flat,
                     Tag = seat,
                     Font = new Font("Bahnschrift", 8, FontStyle.Bold),
@@ -120,29 +113,11 @@ namespace CinemaClient.Forms
                     FlatAppearance = { BorderColor = Color.DeepPink, BorderSize = 1 }
                 };
 
-                switch (seat.Status)
-                {
-                    case "sold":
-                        btn.BackColor = Color.LightGray;
-                        btn.ForeColor = Color.DimGray;
-                        btn.Enabled = false;
-                        btn.FlatAppearance.BorderColor = Color.LightGray;
-                        break;
-                    case "booked":
-                        btn.BackColor = Color.FromArgb(220, 160, 220);
-                        btn.ForeColor = Color.White;
-                        btn.Enabled = false;
-                        break;
-                    default: // free
-                        btn.BackColor = Color.White;
-                        btn.Click += Seat_Click;
-                        break;
-                }
-
+                UpdateSeatButtonAppearance(btn);
+                btn.Click += Seat_Click;
                 seatsTable.Controls.Add(btn, seat.Number - 1, seat.Row - 1);
             }
 
-            // 4. Панель легенды (нижняя часть)
             var legendPanel = new Panel
             {
                 Dock = DockStyle.Bottom,
@@ -151,7 +126,20 @@ namespace CinemaClient.Forms
             };
             mainPanel.Controls.Add(legendPanel);
 
-            // 5. Кнопка бронирования (самая нижняя)
+            var buyButton = new Button
+            {
+                Dock = DockStyle.Bottom,
+                Height = 50,
+                Text = "Купить выбранные места",
+                BackColor = Color.DeepPink,
+                ForeColor = Color.White,
+                Font = new Font("Bahnschrift", 10, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                FlatAppearance = { BorderSize = 0 }
+            };
+            buyButton.Click += BuySelectedSeats_Click;
+            mainPanel.Controls.Add(buyButton);
+
             var bookButton = new Button
             {
                 Dock = DockStyle.Bottom,
@@ -166,26 +154,11 @@ namespace CinemaClient.Forms
             bookButton.Click += BookSelectedSeats_Click;
             mainPanel.Controls.Add(bookButton);
 
-            var buyButton = new Button
-            {
-                Dock = DockStyle.Bottom,
-                Height = 50,
-                Text = "Купить выбранные места",
-                BackColor = Color.DeepPink,
-                ForeColor = Color.White,
-                Font = new Font("Bahnschrift", 10, FontStyle.Bold),
-                FlatStyle = FlatStyle.Flat,
-                FlatAppearance = { BorderSize = 0 }
-            };
-            bookButton.Click += BuySelectedSeats_Click;
-            mainPanel.Controls.Add(buyButton);
-
-            // Добавляем элементы легенды
-            AddLegendItem(legendPanel, "Бронь", Color.PaleVioletRed, 20);
+            AddLegendItem(legendPanel, "Свободно", Color.White, 20);
             AddLegendItem(legendPanel, "Выбрано", Color.MediumVioletRed, 180);
-            AddLegendItem(legendPanel, "Куплено", Color.LightGray, 340);
+            AddLegendItem(legendPanel, "Бронь", Color.FromArgb(220, 160, 220), 340);
+            AddLegendItem(legendPanel, "Куплено", Color.LightGray, 500);
 
-            // Обработчики изменения размера
             this.Resize += (s, ev) => CenterSeatsTable();
             scrollPanel.Resize += (s, ev) => CenterSeatsTable();
         }
@@ -232,68 +205,173 @@ namespace CinemaClient.Forms
 
         private void Seat_Click(object sender, EventArgs e)
         {
+            if (_isProcessing) return;
+
             var btn = (Button)sender;
             var seat = (SeatDto)btn.Tag;
 
+            // Разрешаем взаимодействие только со свободными или забронированными местами
+            if (seat.Status.ToLower() != "free" && seat.Status.ToLower() != "booked")
+                return;
+
             if (_selectedSeats.Contains(btn))
             {
-                btn.BackColor = Color.PaleVioletRed;
                 _selectedSeats.Remove(btn);
+                btn.BackColor = seat.Status.ToLower() == "booked"
+                    ? Color.FromArgb(220, 160, 220)
+                    : Color.White;
+                btn.ForeColor = seat.Status.ToLower() == "booked"
+                    ? Color.White
+                    : Color.Maroon;
             }
             else
             {
-                btn.BackColor = Color.MediumVioletRed;
                 _selectedSeats.Add(btn);
+                btn.BackColor = Color.MediumVioletRed;
+                btn.ForeColor = Color.White;
             }
         }
 
+        // Обновлённый метод бронирования
         private async void BookSelectedSeats_Click(object sender, EventArgs e)
         {
-            if (_selectedSeats.Count == 0)
-            {
-                MessageBox.Show("Выберите хотя бы одно место!", "Внимание",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            if (_isProcessing) return;
+            _isProcessing = true;
 
-            bool allBooked = true;
-            foreach (var btn in _selectedSeats)
+            try
             {
-                var seat = (SeatDto)btn.Tag;
-                if (await _api.BookAsync(seat.TicketId) != 0)
+                if (_selectedSeats.Count == 0)
                 {
-                    allBooked = false;
-                    btn.BackColor = Color.FromArgb(220, 160, 220);
-                    btn.Enabled = false;
+                    MessageBox.Show("Выберите хотя бы одно место!", "Внимание",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                bool allBooked = true;
+                foreach (var btn in _selectedSeats.ToList())
+                {
+                    var oldSeat = (SeatDto)btn.Tag;
+                    if (oldSeat.Status == "free") // Бронируем только свободные места
+                    {
+                        if (await _api.BookAsync(oldSeat.TicketId) != 0)
+                        {
+                            allBooked = false;
+                        }
+                        else
+                        {
+                            var newSeat = oldSeat with { Status = "booked" };
+                            btn.Tag = newSeat;
+                            UpdateSeatButtonAppearance(btn);
+                        }
+                    }
+                }
+
+                if (allBooked)
+                {
+                    MessageBox.Show($"Успешно забронировано мест: {_selectedSeats.Count}", "Успех",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    _selectedSeats.Clear();
                 }
                 else
                 {
-                    btn.BackColor = Color.FromArgb(220, 160, 220);
-                    btn.Enabled = false;
-                    btn.Click -= Seat_Click;
+                    MessageBox.Show("Некоторые места не удалось забронировать.", "Внимание",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    _selectedSeats.Clear();
                 }
             }
-
-            if (allBooked)
+            finally
             {
-                MessageBox.Show($"Успешно забронировано {_selectedSeats.Count} мест!", "Успех",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                _selectedSeats.Clear();
-            }
-            else
-            {
-                MessageBox.Show("Некоторые места не удалось забронировать.", "Внимание",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                _isProcessing = false;
             }
         }
 
         private async void BuySelectedSeats_Click(object sender, EventArgs e)
         {
-            if (_selectedSeats.Count == 0)
+            if (_isProcessing) return;
+            _isProcessing = true;
+
+            try
             {
-                MessageBox.Show("Выберите хотя бы одно место!", "Внимание",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                if (_selectedSeats.Count == 0)
+                {
+                    MessageBox.Show("Выберите хотя бы одно место!", "Внимание",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                bool allBought = true;
+                foreach (var btn in _selectedSeats.ToList())
+                {
+                    var oldSeat = (SeatDto)btn.Tag;
+
+                    // Пытаемся купить место
+                    if (await _api.BuyAsync(oldSeat.TicketId) != 0)
+                    {
+                        allBought = false;
+
+                        // Если не удалось купить - возвращаем первоначальный вид
+                        if (oldSeat.Status == "booked")
+                        {
+                            btn.BackColor = Color.FromArgb(220, 160, 220); // Цвет брони
+                            btn.ForeColor = Color.White;
+                        }
+                        else
+                        {
+                            btn.BackColor = Color.White; // Цвет свободного места
+                            btn.ForeColor = Color.Maroon;
+                        }
+                    }
+                    else
+                    {
+                        // Успешная покупка
+                        var newSeat = oldSeat with { Status = "sold" };
+                        btn.Tag = newSeat;
+                        UpdateSeatButtonAppearance(btn);
+                        _selectedSeats.Remove(btn);
+                    }
+                }
+
+                if (allBought)
+                {
+                    MessageBox.Show($"Успешно куплено {_selectedSeats.Count} мест!", "Успех",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    _selectedSeats.Clear();
+                }
+                else
+                {
+                    MessageBox.Show("Некоторые места не удалось купить.", "Внимание",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            finally
+            {
+                _isProcessing = false;
+            }
+        }
+
+        private void UpdateSeatButtonAppearance(Button btn)
+        {
+            var seat = (SeatDto)btn.Tag;
+
+            switch (seat.Status.ToLower())
+            {
+                case "sold":
+                    btn.BackColor = Color.LightGray;
+                    btn.ForeColor = Color.DimGray;
+                    btn.Enabled = false;
+                    break;
+
+                case "booked":
+                    btn.BackColor = Color.FromArgb(220, 160, 220);
+                    btn.ForeColor = Color.White;
+                    btn.Enabled = true;
+                    break;
+
+                default: // free
+                    btn.BackColor = _selectedSeats.Contains(btn) ? Color.MediumVioletRed : Color.White;
+                    btn.ForeColor = _selectedSeats.Contains(btn) ? Color.White : Color.Maroon;
+                    btn.Enabled = true;
+                    break;
             }
         }
     }
