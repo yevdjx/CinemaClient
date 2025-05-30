@@ -43,8 +43,7 @@
             menuStrip1.Items.AddRange(new ToolStripItem[] { chFilm, sessionWork });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Padding = new Padding(5, 2, 0, 2);
-            menuStrip1.Size = new Size(579, 28);
+            menuStrip1.Size = new Size(724, 30);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -54,7 +53,7 @@
             chFilm.Font = new Font("Bahnschrift", 9F);
             chFilm.ForeColor = Color.Black;
             chFilm.Name = "chFilm";
-            chFilm.Size = new Size(79, 24);
+            chFilm.Size = new Size(94, 26);
             chFilm.Text = "Фильмы";
             chFilm.Click += chFilm_Click;
             // 
@@ -64,10 +63,21 @@
             sessionWork.Font = new Font("Bahnschrift", 9F);
             sessionWork.ForeColor = Color.Black;
             sessionWork.Name = "sessionWork";
-            sessionWork.Size = new Size(74, 24);
+            sessionWork.Size = new Size(89, 26);
             sessionWork.Text = "Сеансы";
             sessionWork.TextDirection = ToolStripTextDirection.Horizontal;
             sessionWork.Click += sessionWork_Click;
+            // 
+            // chTicketSostoyanie
+            // 
+            chTicketSostoyanie.BackColor = Color.PaleVioletRed;
+            chTicketSostoyanie.Font = new Font("Bahnschrift", 9F);
+            chTicketSostoyanie.ForeColor = Color.Black;
+            chTicketSostoyanie.Name = "chTicketSostoyanie";
+            chTicketSostoyanie.Size = new Size(185, 26);
+            chTicketSostoyanie.Text = "Состояние билетов";
+            chTicketSostoyanie.TextDirection = ToolStripTextDirection.Horizontal;
+            chTicketSostoyanie.Click += chTicketSostoyanie_Click;
             // 
             // label1
             // 
@@ -111,6 +121,7 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
+            AutoSizeMode = AutoSizeMode.GrowAndShrink;
             BackColor = Color.AntiqueWhite;
             ClientSize = new Size(579, 244);
             Controls.Add(label3);

@@ -32,6 +32,8 @@
             label1 = new Label();
             sessionList = new DataGridView();
             groupBox1 = new GroupBox();
+            label10 = new Label();
+            label9 = new Label();
             label8 = new Label();
             label7 = new Label();
             tMinutes = new TextBox();
@@ -48,8 +50,6 @@
             label4 = new Label();
             label3 = new Label();
             label2 = new Label();
-            label9 = new Label();
-            label10 = new Label();
             groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)sessionList).BeginInit();
             groupBox1.SuspendLayout();
@@ -114,6 +114,28 @@
             groupBox1.TabIndex = 5;
             groupBox1.TabStop = false;
             // 
+            // label10
+            // 
+            label10.AutoSize = true;
+            label10.Font = new Font("Bahnschrift Condensed", 14F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            label10.ForeColor = Color.DeepPink;
+            label10.Location = new Point(545, 271);
+            label10.Name = "label10";
+            label10.Size = new Size(49, 34);
+            label10.TabIndex = 24;
+            label10.Text = "мин";
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Font = new Font("Bahnschrift Condensed", 14F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            label9.ForeColor = Color.DeepPink;
+            label9.Location = new Point(421, 270);
+            label9.Name = "label9";
+            label9.Size = new Size(26, 34);
+            label9.TabIndex = 23;
+            label9.Text = "ч";
+            // 
             // label8
             // 
             label8.AutoSize = true;
@@ -142,6 +164,7 @@
             tMinutes.Name = "tMinutes";
             tMinutes.Size = new Size(60, 36);
             tMinutes.TabIndex = 20;
+            tMinutes.TextAlign = HorizontalAlignment.Center;
             // 
             // tHours
             // 
@@ -152,6 +175,7 @@
             tHours.Name = "tHours";
             tHours.Size = new Size(60, 36);
             tHours.TabIndex = 19;
+            tHours.TextAlign = HorizontalAlignment.Center;
             // 
             // comboFilm
             // 
@@ -281,32 +305,11 @@
             label2.TabIndex = 2;
             label2.Text = "Сеанс";
             // 
-            // label9
-            // 
-            label9.AutoSize = true;
-            label9.Font = new Font("Bahnschrift Condensed", 14F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            label9.ForeColor = Color.DeepPink;
-            label9.Location = new Point(421, 270);
-            label9.Name = "label9";
-            label9.Size = new Size(26, 34);
-            label9.TabIndex = 23;
-            label9.Text = "ч";
-            // 
-            // label10
-            // 
-            label10.AutoSize = true;
-            label10.Font = new Font("Bahnschrift Condensed", 14F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            label10.ForeColor = Color.DeepPink;
-            label10.Location = new Point(545, 271);
-            label10.Name = "label10";
-            label10.Size = new Size(49, 34);
-            label10.TabIndex = 24;
-            label10.Text = "мин";
-            // 
             // SessionAdminForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
+            AutoSizeMode = AutoSizeMode.GrowAndShrink;
             BackColor = Color.AntiqueWhite;
             ClientSize = new Size(1040, 735);
             Controls.Add(groupBox2);
