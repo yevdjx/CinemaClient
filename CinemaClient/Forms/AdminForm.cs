@@ -31,10 +31,5 @@ namespace CinemaClient.Forms
             var f = new FilmForm(_api);   // передаём тот же ApiService
             f.ShowDialog(this);
         }
-
-        private void chTicketSostoyanie_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }
