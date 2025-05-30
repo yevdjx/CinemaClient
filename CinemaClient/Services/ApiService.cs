@@ -376,30 +376,6 @@ public class ApiService
 
     }
 
-    // Добавьте в CinemaClient.Services.ApiService
-    public async Task<IEnumerable<TicketDto>> GetUserTicketsAsync()
-    {
-        try
-        {
-            var response = await _http.GetAsync("/user/tickets");
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<IEnumerable<TicketDto>>()
-                       ?? Enumerable.Empty<TicketDto>();
-            }
-            return Enumerable.Empty<TicketDto>();
-        }
-        catch
-        {
-            return Enumerable.Empty<TicketDto>();
-        }
-    }
-
-    //public async Task<bool> ConfirmBookingAsync(int ticketId)
-    //{
-    //    var response = await _http.PostAsync($"/tickets/{ticketId}/confirm", null);
-    //    return response.IsSuccessStatusCode;
-    //}
     public async Task<bool> IsHallAvailableAsync(string hallId, DateTime sessionDateTime, int? currentSessionId = null)
     {
         try
@@ -410,6 +386,23 @@ public class ApiService
         catch
         {
             return false;
+        }
+    }
+
+    public async Task<List<TicketDto>> GetUserTicketsAsync()
+    {
+        try
+        {
+            var response = await _http.GetAsync("/api/tickets/my");
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<List<TicketDto>>() ?? new List<TicketDto>();
+            }
+            return new List<TicketDto>();
+        }
+        catch
+        {
+            return new List<TicketDto>();
         }
     }
 
