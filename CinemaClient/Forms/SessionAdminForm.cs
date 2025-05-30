@@ -30,7 +30,8 @@ namespace CinemaClient.Forms
             sessionList.SizeChanged += (sender, e) => AdjustDataGridViewLayout();
         }
 
-        private void SetupEventHandlers()
+        // подписки на события
+        private void SetupEventHandlers() 
         {
             sessionList.SelectionChanged += OnSessionSelected;
             sohrButton.Click += OnSaveClicked;
@@ -44,12 +45,13 @@ namespace CinemaClient.Forms
             sessionList.MultiSelect = false;
         }
 
-
+        // функция для текстбоксов чтобы ввод облегчить для времени
         private void OnTimeInput(object sender, KeyPressEventArgs e)
         {
             e.Handled = !(char.IsDigit(e.KeyChar) || char.IsControl(e.KeyChar));
         }
 
+        // то же для цен
         private void OnPriceInput(object sender, KeyPressEventArgs e)
         {
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
@@ -58,6 +60,7 @@ namespace CinemaClient.Forms
             }
         }
 
+        // чистим форму
         private void ResetFormFields()
         {
             _currentSessionId = null;
@@ -82,6 +85,7 @@ namespace CinemaClient.Forms
         private bool ConfirmAction(string question) =>
             MessageBox.Show(question, "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
 
+        // заполняем комбобоксы
         private async void LoadInitialData()
         {
             try
@@ -113,6 +117,7 @@ namespace CinemaClient.Forms
             }
         }
 
+        // загружаем данные в табличку
         private async Task LoadSessionsList()
         {
             try
@@ -141,7 +146,7 @@ namespace CinemaClient.Forms
             }
         }
 
-
+        // выбор сессии в строке
         async private void OnSessionSelected(object sender, EventArgs e)
         {
             if (sessionList.SelectedRows.Count == 0 ||
@@ -165,7 +170,7 @@ namespace CinemaClient.Forms
 
         }
 
-       
+        // событие кнопки сохранить
         private async void OnSaveClicked(object sender, EventArgs e)
         {
             if (!ValidateForm()) return;
@@ -268,165 +273,7 @@ namespace CinemaClient.Forms
             }
         }
 
-        private async void OnSaveC(object sender, EventArgs e)
-        {
-            //if (!ValidateForm()) return;
-
-            //try
-            //{
-            //    var hallId = (int)comboHall.SelectedValue;
-            //    var movieId = (int)comboFilm.SelectedValue;
-            //    var date = takeTime.Value.Date;
-            //    var hours = int.Parse(tHours.Text);
-            //    var minutes = int.Parse(tMinutes.Text);
-            //    var price = int.Parse(takePrice.Text);
-
-            //    var sessionDateTime = date.AddHours(hours).AddMinutes(minutes);
-
-            //    // Проверка что дата в будущем
-            //    if (sessionDateTime <= DateTime.Now)
-            //    {
-            //        ShowWarning("Дата и время сеанса должны быть в будущем");
-            //        return;
-            //    }
-
-            //    // Если это редактирование существующего сеанса (есть ID)
-            //    if (_currentSessionId.HasValue)
-            //    {
-            //        var result = await _api.UpdateSessionAsync(
-            //            _currentSessionId.Value,
-            //            hallId,
-            //            movieId,
-            //            sessionDateTime,
-            //            price);
-
-            //        if (result.Success)
-            //        {
-            //            ShowSuccess("Сеанс обновлен");
-            //            await LoadSessionsList();
-            //        }
-            //        else
-            //        {
-            //            ShowError(result.Error ?? "Неизвестная ошибка");
-            //        }
-            //        return;
-            //    }
-
-            //    // Для нового сеанса проверяем пересечения по времени
-            //    var sessionsInHall = _currentSessions
-            //        .Where(s => s.hallId == hallId &&
-            //                  s.sessionDateTime.Date == sessionDateTime.Date)
-            //        .ToList();
-
-            //    var selectedMovie = _movies.FirstOrDefault(m => m.movieId == movieId);
-            //    if (selectedMovie == null)
-            //    {
-            //        ShowError("Выбранный фильм не найден");
-            //        return;
-            //    }
-
-            //    var movieDuration = TimeSpan.FromMinutes(selectedMovie.movieDuration);
-
-            //    foreach (var existingSession in sessionsInHall)
-            //    {
-            //        var existingMovie = _movies.FirstOrDefault(m => m.movieId == existingSession.movieId);
-            //        if (existingMovie == null) continue;
-
-            //        var existingDuration = TimeSpan.FromMinutes(existingMovie.movieDuration);
-            //        var existingStart = existingSession.sessionDateTime;
-            //        var existingEnd = existingStart.Add(existingDuration);
-            //        var newEnd = sessionDateTime.Add(movieDuration);
-
-            //        if (sessionDateTime < existingEnd && newEnd > existingStart)
-            //        {
-            //            ShowWarning($"Зал занят с {existingStart:HH:mm} до {existingEnd:HH:mm}");
-            //            return;
-            //        }
-
-
-            //    }
-
-            //    // Создаем новый сеанс
-            //    var createResult = await _api.CreateSessionAsync(
-            //        hallId,
-            //        movieId,
-            //        sessionDateTime,
-            //        price);
-
-            //    if (createResult.Success)
-            //    {
-            //        ShowSuccess("Сеанс добавлен");
-            //        await LoadSessionsList();
-            //    }
-            //    else
-            //    {
-            //        ShowError(createResult.Error ?? "Неизвестная ошибка");
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    ShowError($"Ошибка сохранения: {ex.Message}");
-            //}
-
-
-
-            // НОВОЕ!!!!!!!!!!!!!!!!!1
-
-            if (!ValidateForm()) return;
-
-            //try
-            //{
-            //    var result = _currentSessionId.HasValue
-            //        ? await UpdateExistingSession()
-            //        : await CreateNewSession();
-
-            //    if (result.Success)
-            //    {
-            //        ShowSuccess(_currentSessionId.HasValue ? "Сеанс обновлен" : "Сеанс добавлен");
-            //        LoadSessionsList();
-            //    }
-            //    else
-            //    {
-            //        ShowError(result.Error ?? "Неизвестная ошибка");
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    ShowError($"Ошибка сохранения: {ex.Message}");
-            //}
-
-            try
-            {
-                var hallId = (comboHall.SelectedItem as HallDto)?.hallId;
-                var movieId = (comboFilm.SelectedItem as MovieDto)?.movieId;
-                var date = takeTime.Value.Date;
-                var hours = int.Parse(tHours.Text);
-                var minutes = int.Parse(tMinutes.Text);
-                var price = int.Parse(takePrice.Text);
-
-                var sessionDateTime = date.AddHours(hours).AddMinutes(minutes);
-
-                var result = _currentSessionId.HasValue
-                    ? await UpdateExistingSession(hallId.Value, movieId.Value, sessionDateTime, price)
-                    : await CreateNewSession(hallId.Value, movieId.Value, sessionDateTime, price);
-
-                if (result.Success)
-                {
-                    ShowSuccess(_currentSessionId.HasValue ? "Сеанс обновлен" : "Сеанс добавлен");
-                    await LoadSessionsList(); // Используйте await, если LoadSessionsList является асинхронным методом
-                }
-                else
-                {
-                    ShowError(result.Error ?? "Неизвестная ошибка");
-                }
-            }
-            catch (Exception ex)
-            {
-                ShowError($"Ошибка сохранения: {ex.Message}");
-            }
-        }
-
-
+        // проверка, все ли поля заполнены
         private bool ValidateForm()
         {
             if (comboHall.SelectedItem == null)
@@ -462,30 +309,13 @@ namespace CinemaClient.Forms
             return true;
         }
 
-        private async Task<(bool Success, string? Error)> UpdateExistingSession(int hallId, int movieId, DateTime sessionDateTime, int price)
-        {
-            return await _api.UpdateSessionAsync(
-                _currentSessionId.Value,
-                hallId,
-                movieId,
-                sessionDateTime,
-                price);
-        }
-
-        private async Task<(bool Success, string? Error)> CreateNewSession(int hallId, int movieId, DateTime sessionDateTime, int price)
-        {
-            return await _api.CreateSessionAsync(
-                hallId,
-                movieId,
-                sessionDateTime,
-                price);
-        }
-
+        // кнопка "отменить изменения"
         private void OnCancelClicked(object sender, EventArgs e)
         {
             ResetFormFields();
         }
 
+        // кнопка удалить
         private async void OnDeleteClicked(object sender, EventArgs e)
         {
             if (!_currentSessionId.HasValue)
@@ -510,32 +340,9 @@ namespace CinemaClient.Forms
             }
         }
 
+        // косметика на таблице
         private void AdjustDataGridViewLayout()
         {
-            //if (sessionList.Rows.Count == 0 || sessionList.Columns.Count == 0)
-            //    return;
-
-            //int rowHeight = sessionList.Height / sessionList.Rows.Count;
-
-            //foreach (DataGridViewRow row in sessionList.Rows)
-            //{
-            //    row.Height = rowHeight;
-            //}
-
-            //int visibleColumnsCount = sessionList.Columns.Cast<DataGridViewColumn>()
-            //    .Count(c => c.Visible);
-            //if (visibleColumnsCount == 0) return;
-
-            //int columnWidth = sessionList.Width / visibleColumnsCount;
-
-            //foreach (DataGridViewColumn column in sessionList.Columns)
-            //{
-            //    if (column.Visible)
-            //    {
-            //        column.Width = columnWidth;
-            //    }
-            //}
-
             if (sessionList.Rows.Count == 0 || sessionList.Columns.Count == 0)
                 return;
 

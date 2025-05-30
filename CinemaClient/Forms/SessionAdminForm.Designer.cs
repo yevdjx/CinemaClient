@@ -180,28 +180,35 @@
             // comboFilm
             // 
             comboFilm.BackColor = Color.Pink;
+            comboFilm.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            comboFilm.ForeColor = Color.Maroon;
             comboFilm.FormattingEnabled = true;
-            comboFilm.Location = new Point(293, 153);
+            comboFilm.Location = new Point(293, 148);
             comboFilm.Name = "comboFilm";
-            comboFilm.Size = new Size(329, 33);
+            comboFilm.Size = new Size(329, 37);
             comboFilm.TabIndex = 18;
             // 
             // comboHall
             // 
             comboHall.BackColor = Color.Pink;
+            comboHall.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            comboHall.ForeColor = Color.Maroon;
             comboHall.FormattingEnabled = true;
-            comboHall.Location = new Point(293, 67);
+            comboHall.Location = new Point(293, 77);
             comboHall.Name = "comboHall";
-            comboHall.Size = new Size(329, 33);
+            comboHall.Size = new Size(329, 37);
             comboHall.TabIndex = 17;
             // 
             // takeTime
             // 
+            takeTime.CalendarFont = new Font("Bahnschrift SemiCondensed", 10F, FontStyle.Bold, GraphicsUnit.Point, 204);
+            takeTime.CalendarForeColor = Color.Maroon;
             takeTime.CalendarMonthBackground = Color.Pink;
             takeTime.CalendarTitleBackColor = Color.Maroon;
-            takeTime.Location = new Point(293, 218);
+            takeTime.Font = new Font("Bahnschrift Light", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            takeTime.Location = new Point(293, 213);
             takeTime.Name = "takeTime";
-            takeTime.Size = new Size(329, 31);
+            takeTime.Size = new Size(329, 36);
             takeTime.TabIndex = 15;
             // 
             // delButton
