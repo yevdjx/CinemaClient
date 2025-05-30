@@ -4,12 +4,10 @@ using System.Net;
 using System.Net.Mail;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
-using System.Configuration;
 using System.Collections.Generic;
 using System.Linq;
 using CinemaClient.Services;
 
-// Убедитесь, что есть явные ссылки на пространства имен
 using iTextFont = iTextSharp.text.Font;
 using iTextImage = iTextSharp.text.Image;
 using iTextRectangle = iTextSharp.text.Rectangle;
@@ -25,7 +23,7 @@ namespace CinemaClient.Services
             _apiService = apiService;
         }
 
-        public byte[] GeneratePdfTicket(TicketInfo ticketInfo)
+        public byte[] GeneratePdfTicket(UserTicketDto ticketInfo)
         {
             using (var memoryStream = new MemoryStream())
             {
@@ -41,21 +39,22 @@ namespace CinemaClient.Services
                         BaseFont.CP1252,
                         BaseFont.NOT_EMBEDDED);
 
-                    // Шрифты с явным указанием пространства имен
+                    // Шрифты
                     var titleFont = new iTextFont(baseFont, 20, iTextFont.BOLD);
                     var headerFont = new iTextFont(baseFont, 16, iTextFont.BOLD);
                     var regularFont = new iTextFont(baseFont, 12, iTextFont.NORMAL);
                     var boldFont = new iTextFont(baseFont, 12, iTextFont.BOLD);
                     var smallFont = new iTextFont(baseFont, 10, iTextFont.NORMAL);
 
-                    // Заголовок
-                    document.Add(new Paragraph("КИНОБИЛЕТ", titleFont)
+                    // Заголовок (разный для брони и билета)
+                    string ticketType = ticketInfo.Status == "sold" ? "АГРОБИЛЕТ" : "АГРОБРОНЬ";
+                    document.Add(new Paragraph(ticketType, titleFont)
                     {
                         Alignment = Element.ALIGN_CENTER,
                         SpacingAfter = 20
                     });
 
-                    // Картинка фильма
+                    // Изображение фильма
                     if (ticketInfo.MovieImage != null && ticketInfo.MovieImage.Length > 0)
                     {
                         try
@@ -69,36 +68,42 @@ namespace CinemaClient.Services
                         catch { /* Игнорируем ошибки изображения */ }
                     }
 
-                    // Информация о фильме
+                    // Название фильма
                     document.Add(new Paragraph(ticketInfo.MovieTitle, headerFont)
                     {
                         Alignment = Element.ALIGN_CENTER,
                         SpacingAfter = 15
                     });
 
-                    // Таблица с деталями
+                    // Таблица с информацией
                     var table = new PdfPTable(2)
                     {
                         WidthPercentage = 100,
-                        SpacingBefore = 10f, // Явное указание float
-                        SpacingAfter = 20f     // Явное указание float
+                        SpacingBefore = 10f,
+                        SpacingAfter = 20f
                     };
 
-                    AddTableRow(table, "Дата сеанса:", ticketInfo.SessionDate.ToString("dd.MM.yyyy"), boldFont, regularFont);
-                    AddTableRow(table, "Время сеанса:", ticketInfo.SessionTime, boldFont, regularFont);
+                    AddTableRow(table, "Дата сеанса:", ticketInfo.SessionDateTime.ToString("dd.MM.yyyy"), boldFont, regularFont);
+                    AddTableRow(table, "Время сеанса:", ticketInfo.SessionDateTime.ToString("HH:mm"), boldFont, regularFont);
                     AddTableRow(table, "Зал:", ticketInfo.HallNumber, boldFont, regularFont);
-
-                    foreach (var seat in ticketInfo.Seats)
-                    {
-                        AddTableRow(table, "Место:", $"Ряд {seat.Row}, Место {seat.Number}", boldFont, regularFont);
-                    }
-
-                    AddTableRow(table, "Цена:", $"{ticketInfo.TotalPrice} руб.", boldFont, regularFont);
+                    AddTableRow(table, "Место:", $"Ряд {ticketInfo.Row}, Место {ticketInfo.Seat}", boldFont, regularFont);
+                    AddTableRow(table, "Цена:", $"{ticketInfo.Price} руб.", boldFont, regularFont);
+                    AddTableRow(table, "Статус:", ticketInfo.Status == "sold" ? "Оплачено" : "Забронировано", boldFont, regularFont);
                     AddTableRow(table, "ID билета:", ticketInfo.TicketId.ToString(), boldFont, smallFont);
 
                     document.Add(table);
 
-                    // Подпись
+                    // Предупреждение для брони
+                    if (ticketInfo.Status == "booked")
+                    {
+                        document.Add(new Paragraph("Внимание! Бронь действительна до 15 минут до начала сеанса",
+                            smallFont)
+                        {
+                            Alignment = Element.ALIGN_CENTER,
+                            SpacingBefore = 10f
+                        });
+                    }
+
                     document.Add(new Paragraph("Предъявите этот билет на входе", smallFont)
                     {
                         Alignment = Element.ALIGN_CENTER,
@@ -129,27 +134,32 @@ namespace CinemaClient.Services
             });
         }
 
-        public void SendEmailWithTicket(string email, byte[] ticketPdf, TicketInfo ticketInfo)
+        public async Task SendEmailWithTicketAsync(string email, byte[] ticketPdf, UserTicketDto ticketInfo)
         {
             try
             {
-                using (var smtpClient = new SmtpClient("smtp.gmail.com")
+                using (var smtpClient = new SmtpClient("smtp.mail.ru")
                 {
-                    Port = 587,
-                    Credentials = new NetworkCredential("your-cinema-email@gmail.com", "your-password"),
+                    Port = 465,
+                    Credentials = new NetworkCredential("cate_cate_cate_cate_cate`@mail.ru", "eQhMGgjFBYCUBzbUFpCR"),
                     EnableSsl = true,
                 })
                 {
+                    string ticketType = ticketInfo.Status == "sold" ? "билет" : "бронь";
+
                     var mailMessage = new MailMessage
                     {
-                        From = new MailAddress("your-cinema-email@gmail.com", "Кинотеатр"),
-                        Subject = $"Ваш билет на фильм {ticketInfo.MovieTitle}",
+                        From = new MailAddress("cate_cate_cate_cate_cate@mail.ru", "AgroKino"),
+                        Subject = $"Ваш {ticketType} на фильм {ticketInfo.MovieTitle}",
                         Body = $"Уважаемый зритель!\n\n" +
-                               $"Ваш билет на фильм «{ticketInfo.MovieTitle}» прикреплен к этому письму.\n\n" +
-                               $"Дата: {ticketInfo.SessionDate:dd.MM.yyyy}\n" +
-                               $"Время: {ticketInfo.SessionTime}\n" +
+                               $"Ваш {ticketType} на фильм «{ticketInfo.MovieTitle}» прикреплен к этому письму.\n\n" +
+                               $"Дата: {ticketInfo.SessionDateTime:dd.MM.yyyy}\n" +
+                               $"Время: {ticketInfo.SessionDateTime:HH:mm}\n" +
                                $"Зал: {ticketInfo.HallNumber}\n" +
-                               $"Места: {string.Join(", ", ticketInfo.Seats.Select(s => $"Ряд {s.Row}, Место {s.Number}"))}\n\n" +
+                               $"Место: Ряд {ticketInfo.Row}, Место {ticketInfo.Seat}\n" +
+                               $"Статус: {(ticketInfo.Status == "sold" ? "Оплачено" : "Забронировано")}\n\n" +
+                               (ticketInfo.Status == "booked" ?
+                                "Внимание! Бронь действительна до 15 минут до начала сеанса.\n" : "") +
                                "Приятного просмотра!",
                         IsBodyHtml = false,
                     };
@@ -158,14 +168,21 @@ namespace CinemaClient.Services
 
                     using (var stream = new MemoryStream(ticketPdf))
                     {
+                        string attachmentName = ticketInfo.Status == "sold" ?
+                            $"Билет_{ticketInfo.MovieTitle}_{ticketInfo.SessionDateTime:yyyyMMdd}.pdf" :
+                            $"Бронь_{ticketInfo.MovieTitle}_{ticketInfo.SessionDateTime:yyyyMMdd}.pdf";
+
                         mailMessage.Attachments.Add(new Attachment(
                             stream,
-                            $"Билет_{ticketInfo.MovieTitle}_{DateTime.Now:yyyyMMdd}.pdf",
+                            attachmentName,
                             "application/pdf"));
 
-                        smtpClient.Send(mailMessage);
+                        // Асинхронная отправка!
+                        await smtpClient.SendMailAsync(mailMessage);
                     }
                 }
+
+                Console.WriteLine("Письмо успешно отправлено.");
             }
             catch (Exception ex)
             {
@@ -173,17 +190,6 @@ namespace CinemaClient.Services
                 throw;
             }
         }
-    }
 
-    public class TicketInfo
-    {
-        public Guid TicketId { get; set; } = Guid.NewGuid();
-        public string MovieTitle { get; set; }
-        public byte[] MovieImage { get; set; }
-        public DateTime SessionDate { get; set; }
-        public string SessionTime { get; set; }
-        public string HallNumber { get; set; }
-        public List<SeatDto> Seats { get; set; }
-        public decimal TotalPrice { get; set; }
     }
 }

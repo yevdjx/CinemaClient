@@ -376,35 +376,8 @@ public class ApiService
 
     }
 
-    public async Task<bool> IsHallAvailableAsync(string hallId, DateTime sessionDateTime, int? currentSessionId = null)
-    {
-        try
-        {
-            var response = await _http.GetAsync($"/admin/halls/{hallId}/available?sessionDateTime={sessionDateTime:o}&currentSessionId={currentSessionId}");
-            return response.IsSuccessStatusCode && await response.Content.ReadFromJsonAsync<bool>();
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    public async Task<List<TicketDto>> GetUserTicketsAsync()
-    {
-        try
-        {
-            var response = await _http.GetAsync("/api/tickets/my");
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<List<TicketDto>>() ?? new List<TicketDto>();
-            }
-            return new List<TicketDto>();
-        }
-        catch
-        {
-            return new List<TicketDto>();
-        }
-    }
+    public async Task<IEnumerable<UserTicketDto>> GetUserTicketsAsync() =>
+        await _http.GetFromJsonAsync<IEnumerable<UserTicketDto>>("/booking/my")!;
 
 }
 
@@ -467,4 +440,16 @@ public record SessionAdminDto(
     DateTime sessionDateTime,
     decimal sessionPrice
 );
+
+public record UserTicketDto(
+    int TicketId,
+    int Flag,            // 1 = будет, 0 = прошло/бронь
+    string Status,          // sold | booked
+    string MovieTitle,
+    byte[]? MovieImage,
+    string HallNumber,
+    int Row,
+    int Seat,
+    DateTime SessionDateTime,
+    decimal Price);
 

@@ -2,8 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CinemaClient.Forms
@@ -12,7 +12,7 @@ namespace CinemaClient.Forms
     {
         private readonly ApiService _api;
         private readonly TicketService _ticketService;
-        private List<TicketDto> _userTickets;
+        private List<UserTicketDto> _userTickets;
 
         public KorzinaForm(ApiService api)
         {
@@ -30,8 +30,8 @@ namespace CinemaClient.Forms
             this.Size = new Size(800, 600);
             this.StartPosition = FormStartPosition.CenterScreen;
 
-            // Основные элементы
-            var mainPanel = new Panel { Dock = DockStyle.Fill };
+            // Основной контейнер с прокруткой
+            var mainPanel = new Panel { Dock = DockStyle.Fill, AutoScroll = true };
             this.Controls.Add(mainPanel);
 
             // Заголовок
@@ -47,50 +47,9 @@ namespace CinemaClient.Forms
             };
             mainPanel.Controls.Add(titleLabel);
 
-            // Список билетов
-            var ticketsPanel = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                AutoScroll = true,
-                BackColor = Color.AntiqueWhite,
-                Padding = new Padding(20)
-            };
-            mainPanel.Controls.Add(ticketsPanel);
-
-            // Панель для ввода email
-            var emailPanel = new Panel
-            {
-                Dock = DockStyle.Bottom,
-                Height = 100,
-                BackColor = Color.MistyRose
-            };
-            mainPanel.Controls.Add(emailPanel);
-
-            var emailLabel = new Label
-            {
-                Text = "Email для отправки билетов:",
-                Location = new Point(20, 20),
-                AutoSize = true
-            };
-            emailPanel.Controls.Add(emailLabel);
-
-            var emailTextBox = new TextBox
-            {
-                Location = new Point(20, 50),
-                Width = 300
-            };
-            emailPanel.Controls.Add(emailTextBox);
-
-            var sendButton = new Button
-            {
-                Text = "Отправить билеты",
-                Location = new Point(330, 50),
-                BackColor = Color.DeepPink,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat
-            };
-            sendButton.Click += async (s, e) => await SendTickets(emailTextBox.Text);
-            emailPanel.Controls.Add(sendButton);
+            // Группировка билетов
+            var groupPanel = new Panel { Dock = DockStyle.Fill };
+            mainPanel.Controls.Add(groupPanel);
         }
 
         private async void LoadTickets()
@@ -109,178 +68,221 @@ namespace CinemaClient.Forms
 
         private void DisplayTickets()
         {
-            var ticketsPanel = this.Controls[0].Controls.OfType<FlowLayoutPanel>().First();
-            ticketsPanel.Controls.Clear();
+            var mainPanel = (Panel)this.Controls[0];
+            var groupPanel = (Panel)mainPanel.Controls[1];
+            groupPanel.Controls.Clear();
 
-            var now = DateTime.Now;
-
-            foreach (var ticket in _userTickets.OrderBy(t => t.SessionDateTime))
+            if (!_userTickets.Any())
             {
-                var isExpired = ticket.SessionDateTime < now;
-                var isBooked = ticket.Status == "booked";
-                var isSold = ticket.Status == "sold";
-
-                var card = new Panel
+                var emptyLabel = new Label
                 {
-                    Width = 700,
-                    Height = 150,
-                    Margin = new Padding(10),
-                    BackColor = isExpired ? Color.LightGray :
-                                isBooked ? Color.LightBlue :
-                                Color.LightGreen,
-                    BorderStyle = BorderStyle.FixedSingle
+                    Text = "У вас пока нет билетов",
+                    Dock = DockStyle.Fill,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Font = new Font("Bahnschrift", 14),
+                    ForeColor = Color.Gray
                 };
-
-                var movieLabel = new Label
-                {
-                    Text = ticket.MovieTitle,
-                    Font = new Font("Bahnschrift", 12, FontStyle.Bold),
-                    Location = new Point(10, 10),
-                    AutoSize = true
-                };
-                card.Controls.Add(movieLabel);
-
-                var sessionLabel = new Label
-                {
-                    Text = $"Дата: {ticket.SessionDateTime:dd.MM.yyyy}\n" +
-                           $"Время: {ticket.SessionDateTime:HH:mm}\n" +
-                           $"Зал: {ticket.HallNumber}",
-                    Location = new Point(10, 40),
-                    AutoSize = true
-                };
-                card.Controls.Add(sessionLabel);
-
-                var seatsLabel = new Label
-                {
-                    Text = $"Места: {string.Join(", ", ticket.Seats.Select(s => $"{s.Row}/{s.Number}"))}",
-                    Location = new Point(10, 80),
-                    AutoSize = true
-                };
-                card.Controls.Add(seatsLabel);
-
-                var statusLabel = new Label
-                {
-                    Text = isExpired ? "Просрочен" :
-                          isBooked ? "Бронь (не оплачен)" : "Оплачен",
-                    Location = new Point(500, 10),
-                    AutoSize = true,
-                    ForeColor = isExpired ? Color.Red : Color.Black
-                };
-                card.Controls.Add(statusLabel);
-
-                var priceLabel = new Label
-                {
-                    Text = $"{ticket.Price} руб.",
-                    Location = new Point(500, 40),
-                    AutoSize = true,
-                    Font = new Font("Bahnschrift", 10, FontStyle.Bold)
-                };
-                card.Controls.Add(priceLabel);
-
-                if (isBooked && !isExpired)
-                {
-                    var payButton = new Button
-                    {
-                        Text = "Оплатить",
-                        Location = new Point(500, 80),
-                        Size = new Size(100, 30),
-                        Tag = ticket.TicketId
-                    };
-                    payButton.Click += PayButton_Click;
-                    card.Controls.Add(payButton);
-                }
-
-                ticketsPanel.Controls.Add(card);
-            }
-        }
-
-        private async void PayButton_Click(object sender, EventArgs e)
-        {
-            var button = (Button)sender;
-            var ticketId = (int)button.Tag;
-
-            try
-            {
-                var result = await _api.ConfirmBookingAsync(ticketId);
-                if (result)
-                {
-                    MessageBox.Show("Билет успешно оплачен!", "Успех",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    LoadTickets(); // Обновляем список
-                }
-                else
-                {
-                    MessageBox.Show("Не удалось оплатить билет", "Ошибка",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка оплаты: {ex.Message}", "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private async Task SendTickets(string email)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                MessageBox.Show("Введите email адрес", "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                groupPanel.Controls.Add(emptyLabel);
                 return;
             }
 
-            try
+            // Группируем по статусу (будущие/прошедшие)
+            var now = DateTime.Now;
+            var futureTickets = _userTickets.Where(t => t.Flag == 1).OrderBy(t => t.SessionDateTime).ToList();
+            var pastTickets = _userTickets.Where(t => t.Flag == 0).OrderByDescending(t => t.SessionDateTime).ToList();
+
+            int yPos = 10;
+
+            // Будущие сеансы
+            if (futureTickets.Any())
             {
-                var now = DateTime.Now;
-                var ticketsToSend = _userTickets
-                    .Where(t => t.Status == "sold" && t.SessionDateTime > now)
-                    .ToList();
+                var futureLabel = CreateGroupLabel("Будущие сеансы", yPos);
+                groupPanel.Controls.Add(futureLabel);
+                yPos += 40;
 
-                if (!ticketsToSend.Any())
+                foreach (var ticket in futureTickets)
                 {
-                    MessageBox.Show("Нет билетов для отправки", "Информация",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
+                    var card = CreateTicketCard(ticket, true);
+                    card.Location = new Point(20, yPos);
+                    groupPanel.Controls.Add(card);
+                    yPos += card.Height + 10;
                 }
-
-                foreach (var ticket in ticketsToSend)
-                {
-                    var ticketInfo = new TicketInfo
-                    {
-                        MovieTitle = ticket.MovieTitle,
-                        MovieImage = ticket.MovieImage,
-                        SessionDate = ticket.SessionDateTime.Date,
-                        SessionTime = ticket.SessionDateTime.ToString("HH:mm"),
-                        HallNumber = ticket.HallNumber,
-                        Seats = ticket.Seats.ToList(),
-                        TotalPrice = ticket.Price
-                    };
-
-                    var pdfBytes = _ticketService.GeneratePdfTicket(ticketInfo);
-                    _ticketService.SendEmailWithTicket(email, pdfBytes, ticketInfo);
-                }
-
-                MessageBox.Show($"Билеты успешно отправлены на {email}", "Успех",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                yPos += 20;
             }
-            catch (Exception ex)
+
+            // Прошедшие сеансы
+            if (pastTickets.Any())
             {
-                MessageBox.Show($"Ошибка отправки билетов: {ex.Message}", "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                var pastLabel = CreateGroupLabel("Прошедшие сеансы", yPos);
+                groupPanel.Controls.Add(pastLabel);
+                yPos += 40;
+
+                foreach (var ticket in pastTickets)
+                {
+                    var card = CreateTicketCard(ticket, false);
+                    card.Location = new Point(20, yPos);
+                    groupPanel.Controls.Add(card);
+                    yPos += card.Height + 10;
+                }
+            }
+        }
+
+        private Label CreateGroupLabel(string text, int yPos)
+        {
+            return new Label
+            {
+                Text = text,
+                Location = new Point(20, yPos),
+                AutoSize = true,
+                Font = new Font("Bahnschrift", 12, FontStyle.Bold),
+                ForeColor = Color.Maroon
+            };
+        }
+
+        private Panel CreateTicketCard(UserTicketDto ticket, bool isFuture)
+        {
+            var card = new Panel
+            {
+                Width = 730,
+                Height = 150,
+                BackColor = isFuture ? Color.MistyRose : Color.Lavender,
+                BorderStyle = BorderStyle.FixedSingle,
+                Padding = new Padding(10)
+            };
+
+            // Изображение фильма
+            if (ticket.MovieImage != null && ticket.MovieImage.Length > 0)
+            {
+                try
+                {
+                    using (var ms = new MemoryStream(ticket.MovieImage))
+                    {
+                        var pictureBox = new PictureBox
+                        {
+                            Image = Image.FromStream(ms),
+                            SizeMode = PictureBoxSizeMode.Zoom,
+                            Size = new Size(100, 130),
+                            Location = new Point(10, 10)
+                        };
+                        card.Controls.Add(pictureBox);
+                    }
+                }
+                catch { /* Игнорируем ошибки загрузки изображения */ }
+            }
+
+            // Основная информация
+            var infoLabel = new Label
+            {
+                Text = $"{ticket.MovieTitle}\n" +
+                      $"Дата: {ticket.SessionDateTime:dd.MM.yyyy}\n" +
+                      $"Время: {ticket.SessionDateTime:HH:mm}\n" +
+                      $"Зал: {ticket.HallNumber}\n" +
+                      $"Место: Ряд {ticket.Row}, Место {ticket.Seat}",
+                Location = new Point(120, 10),
+                AutoSize = true,
+                Font = new Font("Bahnschrift", 10)
+            };
+            card.Controls.Add(infoLabel);
+
+            // Статус и цена
+            var statusLabel = new Label
+            {
+                Text = ticket.Status == "booked" ? "Бронь" : "Оплачено",
+                Location = new Point(400, 10),
+                AutoSize = true,
+                Font = new Font("Bahnschrift", 10, FontStyle.Bold),
+                ForeColor = ticket.Status == "booked" ? Color.Blue : Color.Green
+            };
+            card.Controls.Add(statusLabel);
+
+            var priceLabel = new Label
+            {
+                Text = $"{ticket.Price} руб.",
+                Location = new Point(400, 40),
+                AutoSize = true,
+                Font = new Font("Bahnschrift", 10, FontStyle.Bold)
+            };
+            card.Controls.Add(priceLabel);
+
+            // Кнопка отправки только для будущих сеансов
+            if (isFuture)
+            {
+                var sendButton = new Button
+                {
+                    Text = "Отправить билет",
+                    Location = new Point(550, 80),
+                    Size = new Size(150, 30),
+                    BackColor = Color.DeepPink,
+                    ForeColor = Color.White,
+                    FlatStyle = FlatStyle.Flat,
+                    Tag = ticket
+                };
+                sendButton.FlatAppearance.BorderSize = 0;
+                sendButton.Click += SendButton_Click;
+                card.Controls.Add(sendButton);
+            }
+
+            return card;
+        }
+
+        private async void SendButton_Click(object sender, EventArgs e)
+        {
+            var button = (Button)sender;
+            var ticket = (UserTicketDto)button.Tag;
+
+            using (var inputForm = new Form())
+            {
+                inputForm.Text = "Отправить билет на email";
+                inputForm.Size = new Size(350, 180);
+                inputForm.StartPosition = FormStartPosition.CenterParent;
+                inputForm.BackColor = Color.AntiqueWhite;
+                inputForm.FormBorderStyle = FormBorderStyle.FixedDialog;
+
+                var emailLabel = new Label
+                {
+                    Text = "Введите email:",
+                    Location = new Point(20, 20),
+                    AutoSize = true
+                };
+                inputForm.Controls.Add(emailLabel);
+
+                var emailTextBox = new TextBox
+                {
+                    Location = new Point(20, 50),
+                    Width = 300
+                };
+                inputForm.Controls.Add(emailTextBox);
+
+                var sendButton = new Button
+                {
+                    Text = "Отправить",
+                    Location = new Point(120, 100),
+                    Size = new Size(100, 30),
+                    BackColor = Color.DeepPink,
+                    ForeColor = Color.White,
+                    FlatStyle = FlatStyle.Flat,
+                    DialogResult = DialogResult.OK
+                };
+                inputForm.Controls.Add(sendButton);
+                inputForm.AcceptButton = sendButton;
+
+                if (inputForm.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(emailTextBox.Text))
+                {
+                    try
+                    {
+                        var pdfBytes = _ticketService.GeneratePdfTicket(ticket);
+                        await _ticketService.SendEmailWithTicketAsync(emailTextBox.Text, pdfBytes, ticket);
+
+                        MessageBox.Show($"Билет на {ticket.MovieTitle} успешно отправлен!", "Успех",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка отправки: {ex.Message}", "Ошибка",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
             }
         }
     }
-}
-
-public class TicketDto
-{
-    public int TicketId { get; set; }
-    public string MovieTitle { get; set; }
-    public byte[] MovieImage { get; set; }
-    public DateTime SessionDateTime { get; set; }
-    public string HallNumber { get; set; }
-    public IEnumerable<SeatDto> Seats { get; set; }
-    public decimal Price { get; set; }
-    public string Status { get; set; } // "booked" или "sold"
 }
