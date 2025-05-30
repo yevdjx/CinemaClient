@@ -2,10 +2,10 @@
 using System.IO;
 using System.Net;
 using System.Net.Mail;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
-using System.Collections.Generic;
-using System.Linq;
 using CinemaClient.Services;
 
 using iTextFont = iTextSharp.text.Font;
@@ -23,101 +23,131 @@ namespace CinemaClient.Services
             _apiService = apiService;
         }
 
-        public byte[] GeneratePdfTicket(UserTicketDto ticketInfo)
+        public byte[] GeneratePdfTicket(UserTicketDto t)
         {
-            using (var memoryStream = new MemoryStream())
-            {
-                var pageSize = PageSize.A5.Rotate();
-                var document = new Document(pageSize, 25, 25, 30, 30);
-                PdfWriter.GetInstance(document, memoryStream);
-                document.Open();
+            using var ms = new MemoryStream();
 
+            // Горизонтальный A5 (как реальный билет)
+            var doc = new Document(PageSize.A5.Rotate(), 25, 25, 20, 20);
+            var writer = PdfWriter.GetInstance(doc, ms);
+            doc.Open();
+            // Путь к шрифту
+            var fontPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "DejaVuSans.ttf");
+
+            // Создаём BaseFont
+            var baseF = BaseFont.CreateFont(fontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+
+            // Создаём Font'ы
+            var titleF = new iTextFont(baseF, 28, iTextFont.BOLD, BaseColor.White);
+            var boldF = new iTextFont(baseF, 12, iTextFont.BOLD);
+            var regF = new iTextFont(baseF, 12, iTextFont.NORMAL);
+            var smallF = new iTextFont(baseF, 10, iTextFont.NORMAL);
+            var headerBg = new BaseColor(220, 20, 60);   // красный (Crimson)
+            var headYel = new BaseColor(255, 215, 0);   // ярко-жёлтый (шапка таблицы)
+            var cellYel = new BaseColor(255, 239, 153); // бледно-жёлтый (данные)
+
+            /* ---------- Шапка «БИЛЕТ» ------------------------------------ */
+            var headerTbl = new PdfPTable(1) { WidthPercentage = 100, SpacingAfter = 8 };
+            headerTbl.AddCell(new PdfPCell(new Phrase("БИЛЕТ", titleF))
+            {
+                BackgroundColor = headerBg,
+                HorizontalAlignment = Element.ALIGN_CENTER,
+                PaddingTop = 10,
+                PaddingBottom = 10,
+                Border = iTextRectangle.NO_BORDER
+            });
+
+            /* ---------- Таблица с данными -------------------------------- */
+            var dataTbl = new PdfPTable(7)
+            {
+                WidthPercentage = 100,
+                SpacingBefore = 5,
+                SpacingAfter = 10
+            };
+            dataTbl.SetWidths(new float[] { 3f, 2f, 2f, 1.2f, 1.2f, 1.2f, 2f });
+
+            void AddHead(string txt) => dataTbl.AddCell(new PdfPCell(new Phrase(txt, boldF))
+            {
+                BackgroundColor = headYel,
+                HorizontalAlignment = Element.ALIGN_CENTER,
+                VerticalAlignment = Element.ALIGN_MIDDLE,
+                Padding = 4
+            });
+
+            void AddCell(string txt) => dataTbl.AddCell(new PdfPCell(new Phrase(txt, regF))
+            {
+                BackgroundColor = cellYel,
+                HorizontalAlignment = Element.ALIGN_CENTER,
+                VerticalAlignment = Element.ALIGN_MIDDLE,
+                Padding = 4
+            });
+
+            // строка шапки
+            foreach (var h in new[] { "ФИЛЬМ", "ДАТА", "ВРЕМЯ", "ЗАЛ", "РЯД", "МЕСТО", "ЦЕНА" })
+                AddHead(h);
+
+            // строка с данными
+            AddCell(t.MovieTitle);
+            AddCell(t.SessionDateTime.ToString("dd.MM.yyyy"));
+            AddCell(t.SessionDateTime.ToString("HH:mm"));
+            AddCell(t.HallNumber.ToString());
+            AddCell(t.Row.ToString());
+            AddCell(t.Seat.ToString());
+            AddCell($"{t.Price} руб.");
+
+            /* ---------- Лого при наличии (уменьшаем до 60px) ------------- */
+            PdfPCell logoCell = null;
+            if (t.MovieImage?.Length > 0)
+            {
                 try
                 {
-                    var baseFont = BaseFont.CreateFont(
-                        BaseFont.HELVETICA,
-                        BaseFont.CP1252,
-                        BaseFont.NOT_EMBEDDED);
-
-                    // Шрифты
-                    var titleFont = new iTextFont(baseFont, 20, iTextFont.BOLD);
-                    var headerFont = new iTextFont(baseFont, 16, iTextFont.BOLD);
-                    var regularFont = new iTextFont(baseFont, 12, iTextFont.NORMAL);
-                    var boldFont = new iTextFont(baseFont, 12, iTextFont.BOLD);
-                    var smallFont = new iTextFont(baseFont, 10, iTextFont.NORMAL);
-
-                    // Заголовок (разный для брони и билета)
-                    string ticketType = ticketInfo.Status == "sold" ? "АГРОБИЛЕТ" : "АГРОБРОНЬ";
-                    document.Add(new Paragraph(ticketType, titleFont)
+                    var img = iTextImage.GetInstance(t.MovieImage);
+                    img.ScaleToFit(60, 60);
+                    logoCell = new PdfPCell(img)
                     {
-                        Alignment = Element.ALIGN_CENTER,
-                        SpacingAfter = 20
-                    });
-
-                    // Изображение фильма
-                    if (ticketInfo.MovieImage != null && ticketInfo.MovieImage.Length > 0)
-                    {
-                        try
-                        {
-                            var movieImage = iTextImage.GetInstance(ticketInfo.MovieImage);
-                            movieImage.ScaleToFit(200, 200);
-                            movieImage.Alignment = Element.ALIGN_CENTER;
-                            document.Add(movieImage);
-                            document.Add(new Paragraph(" "));
-                        }
-                        catch { /* Игнорируем ошибки изображения */ }
-                    }
-
-                    // Название фильма
-                    document.Add(new Paragraph(ticketInfo.MovieTitle, headerFont)
-                    {
-                        Alignment = Element.ALIGN_CENTER,
-                        SpacingAfter = 15
-                    });
-
-                    // Таблица с информацией
-                    var table = new PdfPTable(2)
-                    {
-                        WidthPercentage = 100,
-                        SpacingBefore = 10f,
-                        SpacingAfter = 20f
+                        Border = iTextRectangle.NO_BORDER,
+                        HorizontalAlignment = Element.ALIGN_LEFT,
+                        PaddingRight = 5
                     };
-
-                    AddTableRow(table, "Дата сеанса:", ticketInfo.SessionDateTime.ToString("dd.MM.yyyy"), boldFont, regularFont);
-                    AddTableRow(table, "Время сеанса:", ticketInfo.SessionDateTime.ToString("HH:mm"), boldFont, regularFont);
-                    AddTableRow(table, "Зал:", ticketInfo.HallNumber, boldFont, regularFont);
-                    AddTableRow(table, "Место:", $"Ряд {ticketInfo.Row}, Место {ticketInfo.Seat}", boldFont, regularFont);
-                    AddTableRow(table, "Цена:", $"{ticketInfo.Price} руб.", boldFont, regularFont);
-                    AddTableRow(table, "Статус:", ticketInfo.Status == "sold" ? "Оплачено" : "Забронировано", boldFont, regularFont);
-                    AddTableRow(table, "ID билета:", ticketInfo.TicketId.ToString(), boldFont, smallFont);
-
-                    document.Add(table);
-
-                    // Предупреждение для брони
-                    if (ticketInfo.Status == "booked")
-                    {
-                        document.Add(new Paragraph("Внимание! Бронь действительна до 15 минут до начала сеанса",
-                            smallFont)
-                        {
-                            Alignment = Element.ALIGN_CENTER,
-                            SpacingBefore = 10f
-                        });
-                    }
-
-                    document.Add(new Paragraph("Предъявите этот билет на входе", smallFont)
-                    {
-                        Alignment = Element.ALIGN_CENTER,
-                        SpacingBefore = 20f
-                    });
                 }
-                finally
-                {
-                    document.Close();
-                }
-                return memoryStream.ToArray();
+                catch { /* игнорируем */ }
             }
-        }
 
+            /* ---------- Сайд-бар «КОНТРОЛЬ» ------------------------------ */
+            var redColor = new BaseColor(255, 0, 0);
+            var controlCell = new PdfPCell(new Phrase("КОНТРОЛЬ",
+                                new iTextFont(baseF, 14, iTextFont.BOLD, redColor)))
+            {
+                Rotation = 90,
+                BackgroundColor = cellYel,
+                HorizontalAlignment = Element.ALIGN_CENTER,
+                VerticalAlignment = Element.ALIGN_MIDDLE,
+                Border = iTextRectangle.NO_BORDER
+            };
+
+            /* ---------- Компоновка в одну широкую таблицу ---------------- */
+            var outer = new PdfPTable(2) { WidthPercentage = 100 };
+            outer.SetWidths(new float[] { 12f, 1.2f });
+
+            // первая колонка (внутри — лого, шапка, таблица, футер)
+            var inner = new PdfPTable(1) { WidthPercentage = 100 };
+            if (logoCell != null) inner.AddCell(logoCell);                // лого
+            inner.AddCell(headerTbl);                                     // БИЛЕТ
+            inner.AddCell(dataTbl);                                       // данные
+            inner.AddCell(new PdfPCell(new Phrase("Кинотеатр AgroKino  •  www.agrocinema.ru", smallF))
+            {
+                Border = iTextRectangle.NO_BORDER,
+                HorizontalAlignment = Element.ALIGN_CENTER,
+                PaddingTop = 6
+            });
+
+            outer.AddCell(new PdfPCell(inner) { Border = iTextRectangle.NO_BORDER });
+            outer.AddCell(controlCell);                                   // полоска КОНТРОЛЬ
+
+            doc.Add(outer);
+            doc.Close();
+            return ms.ToArray();
+        }
         private void AddTableRow(PdfPTable table, string label, string value, iTextFont labelFont, iTextFont valueFont)
         {
             table.AddCell(new PdfPCell(new Phrase(label, labelFont))
@@ -138,13 +168,13 @@ namespace CinemaClient.Services
         {
             try
             {
-                using (var smtpClient = new SmtpClient("smtp.mail.ru")
+                using (var smtpClient = new SmtpClient("smtp.mail.ru", 587))
                 {
-                    Port = 465,
-                    Credentials = new NetworkCredential("cate_cate_cate_cate_cate`@mail.ru", "eQhMGgjFBYCUBzbUFpCR"),
-                    EnableSsl = true,
-                })
-                {
+                    smtpClient.Credentials = new NetworkCredential("cate_cate_cate_cate_cate@mail.ru", "eQhMGgjFBYCUBzbUFpCR");
+                    smtpClient.EnableSsl = true;
+                    smtpClient.UseDefaultCredentials = false;
+                    smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+
                     string ticketType = ticketInfo.Status == "sold" ? "билет" : "бронь";
 
                     var mailMessage = new MailMessage
@@ -158,8 +188,9 @@ namespace CinemaClient.Services
                                $"Зал: {ticketInfo.HallNumber}\n" +
                                $"Место: Ряд {ticketInfo.Row}, Место {ticketInfo.Seat}\n" +
                                $"Статус: {(ticketInfo.Status == "sold" ? "Оплачено" : "Забронировано")}\n\n" +
-                               (ticketInfo.Status == "booked" ?
-                                "Внимание! Бронь действительна до 15 минут до начала сеанса.\n" : "") +
+                               (ticketInfo.Status == "booked"
+                                    ? "Внимание! Бронь действительна до 15 минут до начала сеанса.\n"
+                                    : "") +
                                "Приятного просмотра!",
                         IsBodyHtml = false,
                     };
@@ -168,28 +199,29 @@ namespace CinemaClient.Services
 
                     using (var stream = new MemoryStream(ticketPdf))
                     {
-                        string attachmentName = ticketInfo.Status == "sold" ?
-                            $"Билет_{ticketInfo.MovieTitle}_{ticketInfo.SessionDateTime:yyyyMMdd}.pdf" :
-                            $"Бронь_{ticketInfo.MovieTitle}_{ticketInfo.SessionDateTime:yyyyMMdd}.pdf";
+                        string attachmentName = ticketInfo.Status == "sold"
+                            ? $"Билет_{ticketInfo.MovieTitle}_{ticketInfo.SessionDateTime:yyyyMMdd}.pdf"
+                            : $"Бронь_{ticketInfo.MovieTitle}_{ticketInfo.SessionDateTime:yyyyMMdd}.pdf";
 
                         mailMessage.Attachments.Add(new Attachment(
                             stream,
                             attachmentName,
                             "application/pdf"));
 
-                        // Асинхронная отправка!
+                        // Асинхронная отправка
                         await smtpClient.SendMailAsync(mailMessage);
                     }
                 }
 
-                Console.WriteLine("Письмо успешно отправлено.");
+                // Показываем MessageBox
+                MessageBox.Show("Письмо успешно отправлено!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка отправки email: {ex.Message}");
+                // Показываем MessageBox при ошибке
+                MessageBox.Show($"Ошибка отправки email: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 throw;
             }
         }
-
     }
 }

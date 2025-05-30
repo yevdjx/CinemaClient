@@ -1,7 +1,9 @@
 namespace CinemaClient
 {
+    using System.Text;
     using CinemaClient.Forms;
     using CinemaClient.Services;
+
     internal static class Program
     {
         /// <summary>
@@ -14,6 +16,7 @@ namespace CinemaClient
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             var api = new ApiService("http://91-236-79-198.nip.io");
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             Application.Run(new LoginForm(api));
         }
     }
