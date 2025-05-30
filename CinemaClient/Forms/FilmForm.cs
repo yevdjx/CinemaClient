@@ -36,11 +36,13 @@ namespace CinemaClient.Forms
             filmList.MultiSelect = false;
         }
 
+        // органичения на ввод
         private void OnDurationInput(object sender, KeyPressEventArgs e)
         {
             e.Handled = !(char.IsDigit(e.KeyChar) || char.IsControl(e.KeyChar));
         }
 
+        // типа очистка формы
         private void ResetFormFields()
         {
             _currentMovieId = null;
@@ -63,6 +65,7 @@ namespace CinemaClient.Forms
         private bool ConfirmAction(string question) =>
             MessageBox.Show(question, "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
 
+        // заполнение таблицы
         private async void LoadMovieList()
         {
             try
@@ -79,7 +82,7 @@ namespace CinemaClient.Forms
                     filmList.Columns["movieAgeRating"].HeaderText = "Возрастное ограничение";
                 }
 
-                ResetFormFields();
+                ResetFormFields(); 
                 AdjustDataGridViewLayout();
             }
             catch (Exception ex)
@@ -88,6 +91,7 @@ namespace CinemaClient.Forms
             }
         }
 
+        // выделение строки таблицы - получаем объектик фильма
         async private void OnFilmSelected(object sender, EventArgs e)
         {
             if (filmList.SelectedRows.Count == 0 ||
@@ -126,7 +130,7 @@ namespace CinemaClient.Forms
             }
         }
 
-
+        // событие кнопки СОХРАНИТЬ
         private async void OnSaveClicked(object sender, EventArgs e)
         {
             if (!ValidateForm()) return;
@@ -153,6 +157,7 @@ namespace CinemaClient.Forms
             }
         }
 
+        // проверяем чтобы не оставляли поля пустыми
         private bool ValidateForm()
         {
             if (string.IsNullOrWhiteSpace(takeFilmName.Text))
@@ -204,11 +209,13 @@ namespace CinemaClient.Forms
 
         }
 
+        // очистка полей - сброс изменений
         private void OnCancelClicked(object sender, EventArgs e)
         {
             ResetFormFields();
         }
 
+        // событие на кнопку УДАЛИТЬ
         private async void OnDeleteClicked(object sender, EventArgs e)
         {
             if (!_currentMovieId.HasValue)
@@ -233,6 +240,7 @@ namespace CinemaClient.Forms
             }
         }
 
+        // наводим красоту в таблице
         private void AdjustDataGridViewLayout()
         {
             // Проверяем, есть ли данные и столбцы
@@ -265,6 +273,7 @@ namespace CinemaClient.Forms
             }
         }
 
+        // кнопка добавить ПОСТЕР
         private void addPoster_Click(object sender, EventArgs e)
         {
             try
@@ -312,7 +321,8 @@ namespace CinemaClient.Forms
             }
         }
 
-        public static byte[] PictureBoxImageToByteArray(PictureBox pictureBox)
+        // переводим картинку в байты
+        public static byte[] PictureBoxImageToByteArray(PictureBox pictureBox) 
         {
             if (pictureBox.Image == null)
             {
