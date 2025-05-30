@@ -185,7 +185,7 @@ namespace CinemaClient.Forms
             {
                 seatsTable.Location = new Point(
                     (seatsContainer.ClientSize.Width - seatsTable.Width) / 2,
-                    20);
+                    50);
             }
         }
 
@@ -369,8 +369,6 @@ namespace CinemaClient.Forms
                 _isProcessing = false;
             }
         }
-
-
         private async void BuySelectedSeats_Click(object sender, EventArgs e)
         {
             if (_isProcessing) return;

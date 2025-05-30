@@ -33,6 +33,45 @@ namespace CinemaClient.Forms
             this.Text = "Кинотеатр - Расписание сеансов";
             this.WindowState = FormWindowState.Maximized;
 
+            // Панель с датами (меню)
+            _dateMenuPanel = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Top,
+                Height = 60,
+                BackColor = Color.PaleVioletRed,
+                AutoScroll = true,
+                Margin = new Padding(0, 40, 0, 0) // Учитываем высоту верхней панели
+            };
+            this.Controls.Add(_dateMenuPanel);
+
+            // Панель для верхней части с кнопкой личного кабинета
+            var topPanel = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 40,
+                BackColor = Color.PaleVioletRed
+            };
+            this.Controls.Add(topPanel);
+
+            // Кнопка личного кабинета
+            var accountButton = new Button
+            {
+                Text = "Мои билеты",
+                Dock = DockStyle.Right,
+                Width = 150,
+                Height = 30,
+                Margin = new Padding(5),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.MistyRose,
+                ForeColor = Color.Maroon,
+                Font = new Font("Bahnschrift SemiBold Condensed", 10, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            accountButton.FlatAppearance.BorderSize = 1;
+            accountButton.Click += AccountButton_Click;
+            topPanel.Controls.Add(accountButton);
+
+
             // Основная панель с фильмами
             _moviesPanel = new FlowLayoutPanel
             {
@@ -42,16 +81,6 @@ namespace CinemaClient.Forms
                 Padding = new Padding(20)
             };
             this.Controls.Add(_moviesPanel);
-
-            // Панель с датами (меню)
-            _dateMenuPanel = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Top,
-                Height = 60,
-                BackColor = Color.PaleVioletRed,
-                AutoScroll = true
-            };
-            this.Controls.Add(_dateMenuPanel);
         }
 
         private async void LoadDataAsync()
@@ -215,6 +244,12 @@ namespace CinemaClient.Forms
                 var hallForm = new HallForm(_api, selectedSession.SessionId, selectedSession.MovieTitle);
                 hallForm.ShowDialog();
             }
+        }
+        private void AccountButton_Click(object sender, EventArgs e)
+        {
+            var accountForm = new KorzinaForm(_api); 
+            accountForm.ShowDialog();
+
         }
     }
 }

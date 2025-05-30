@@ -114,6 +114,7 @@ namespace CinemaClient.Forms
             {
                 Image image = await _api.GetMovieImageAsync((int)_currentMovieId);
 
+                pictureBox1.Image = image;
                 if (image != null)
                 {
                     pictureBox1.Image?.Dispose(); // Освобождаем предыдущее изображение
@@ -269,7 +270,6 @@ namespace CinemaClient.Forms
         {
             try
             {
-                // Настройка диалога открытия файла
                 using (OpenFileDialog openFileDialog = new OpenFileDialog())
                 {
                     openFileDialog.Filter = "JPEG Images|*.jpg;*.jpeg";
@@ -279,7 +279,7 @@ namespace CinemaClient.Forms
                     {
                         string filePath = openFileDialog.FileName;
 
-                        // Проверка расширения файла (опционально)
+                        // Проверка расширения файла
                         if (!filePath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) &&
                             !filePath.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
                         {
@@ -287,10 +287,15 @@ namespace CinemaClient.Forms
                             return;
                         }
 
-                        // Загрузка изображения
-                        Image image = Image.FromFile(filePath);
-                        pictureBox1.Image?.Dispose(); // Освобождаем предыдущее изображение
-                        pictureBox1.Image = image;
+                        // Загружаем и копируем изображение в память
+                        using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                        {
+                            Image originalImage = Image.FromStream(stream);
+                            Image imageCopy = new Bitmap(originalImage);
+
+                            pictureBox1.Image?.Dispose(); // освобождаем старое
+                            pictureBox1.Image = imageCopy;
+                        }
                     }
                 }
             }
@@ -307,21 +312,19 @@ namespace CinemaClient.Forms
                 MessageBox.Show($"Произошла ошибка: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
         public static byte[] PictureBoxImageToByteArray(PictureBox pictureBox)
         {
             if (pictureBox.Image == null)
             {
-                return null; // Возвращаем null, если изображение отсутствует
+                return null;
             }
 
             using (var ms = new MemoryStream())
             {
-                // Сохраняем изображение из PictureBox в MemoryStream в формате JPEG
                 pictureBox.Image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
-                // Возвращаем массив байтов
                 return ms.ToArray();
             }
         }
-
     }
 }
