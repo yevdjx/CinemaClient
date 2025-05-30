@@ -112,17 +112,16 @@ namespace CinemaClient.Forms
             }
             else
             {
-                Image image = await _api.GetMovieImageAsync((int)_currentMovieId);
+                Image apiImage = await _api.GetMovieImageAsync((int)_currentMovieId);
 
-                pictureBox1.Image = image;
-                if (image != null)
+                if (apiImage != null)
                 {
-                    pictureBox1.Image?.Dispose(); // Освобождаем предыдущее изображение
-                    pictureBox1.Image = image;
-                }
-                else
-                {
-                    MessageBox.Show("Не удалось загрузить изображение.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Image imageCopy = new Bitmap(apiImage);
+
+                    pictureBox1.Image?.Dispose();
+                    pictureBox1.Image = imageCopy;
+
+                    apiImage.Dispose(); // чтобы не висел лишний ресурс
                 }
             }
         }
@@ -322,7 +321,12 @@ namespace CinemaClient.Forms
 
             using (var ms = new MemoryStream())
             {
-                pictureBox.Image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                // Создаём новую Bitmap копию — 100% безопасно для сохранения
+                using (var bmp = new Bitmap(pictureBox.Image))
+                {
+                    bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
+
                 return ms.ToArray();
             }
         }
