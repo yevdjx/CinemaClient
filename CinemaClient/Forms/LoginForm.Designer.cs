@@ -42,10 +42,10 @@
             btnLogin.BackColor = Color.PaleVioletRed;
             btnLogin.Dock = DockStyle.Bottom;
             btnLogin.Font = new Font("Bahnschrift Condensed", 16.2F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            btnLogin.Location = new Point(0, 707);
-            btnLogin.Margin = new Padding(4, 5, 4, 5);
+            btnLogin.Location = new Point(0, 565);
+            btnLogin.Margin = new Padding(3, 4, 3, 4);
             btnLogin.Name = "btnLogin";
-            btnLogin.Size = new Size(911, 91);
+            btnLogin.Size = new Size(729, 73);
             btnLogin.TabIndex = 0;
             btnLogin.Text = "Вход";
             btnLogin.UseVisualStyleBackColor = false;
@@ -55,32 +55,31 @@
             // 
             txtLogin.BackColor = Color.PaleVioletRed;
             txtLogin.Font = new Font("Times New Roman", 15.75F);
-            txtLogin.Location = new Point(281, 349);
-            txtLogin.Margin = new Padding(4, 5, 4, 5);
+            txtLogin.Location = new Point(225, 279);
+            txtLogin.Margin = new Padding(3, 4, 3, 4);
             txtLogin.Name = "txtLogin";
-            txtLogin.Size = new Size(319, 44);
+            txtLogin.Size = new Size(256, 38);
             txtLogin.TabIndex = 1;
             // 
             // txtPassword
             // 
             txtPassword.BackColor = Color.PaleVioletRed;
             txtPassword.Font = new Font("Times New Roman", 15.75F);
-            txtPassword.Location = new Point(281, 478);
-            txtPassword.Margin = new Padding(4, 5, 4, 5);
+            txtPassword.Location = new Point(225, 382);
+            txtPassword.Margin = new Padding(3, 4, 3, 4);
             txtPassword.Name = "txtPassword";
-            txtPassword.Size = new Size(319, 44);
+            txtPassword.PasswordChar = '•';
+            txtPassword.Size = new Size(256, 38);
             txtPassword.TabIndex = 2;
-            txtPassword.KeyPress += txtPassword_KeyPress;
             // 
             // label1
             // 
             label1.AutoSize = true;
             label1.Font = new Font("Bahnschrift Condensed", 16.2F, FontStyle.Bold, GraphicsUnit.Point, 204);
             label1.ForeColor = Color.DeepPink;
-            label1.Location = new Point(281, 301);
-            label1.Margin = new Padding(4, 0, 4, 0);
+            label1.Location = new Point(225, 241);
             label1.Name = "label1";
-            label1.Size = new Size(81, 40);
+            label1.Size = new Size(70, 34);
             label1.TabIndex = 3;
             label1.Text = "Логин";
             // 
@@ -89,10 +88,9 @@
             label2.AutoSize = true;
             label2.Font = new Font("Bahnschrift Condensed", 16.2F, FontStyle.Bold, GraphicsUnit.Point, 204);
             label2.ForeColor = Color.DeepPink;
-            label2.Location = new Point(281, 434);
-            label2.Margin = new Padding(4, 0, 4, 0);
+            label2.Location = new Point(225, 347);
             label2.Name = "label2";
-            label2.Size = new Size(95, 40);
+            label2.Size = new Size(81, 34);
             label2.TabIndex = 4;
             label2.Text = "Пароль";
             // 
@@ -102,10 +100,10 @@
             btnReg.Dock = DockStyle.Bottom;
             btnReg.Font = new Font("Bahnschrift Condensed", 16.2F, FontStyle.Bold, GraphicsUnit.Point, 204);
             btnReg.ForeColor = SystemColors.ControlText;
-            btnReg.Location = new Point(0, 616);
-            btnReg.Margin = new Padding(4, 5, 4, 5);
+            btnReg.Location = new Point(0, 492);
+            btnReg.Margin = new Padding(3, 4, 3, 4);
             btnReg.Name = "btnReg";
-            btnReg.Size = new Size(911, 91);
+            btnReg.Size = new Size(729, 73);
             btnReg.TabIndex = 5;
             btnReg.Text = " Регистрация";
             btnReg.UseVisualStyleBackColor = false;
@@ -116,19 +114,18 @@
             AgoKino.AutoSize = true;
             AgoKino.Font = new Font("Bahnschrift Condensed", 90F, FontStyle.Bold, GraphicsUnit.Point, 204);
             AgoKino.ForeColor = Color.DeepPink;
-            AgoKino.Location = new Point(149, 11);
-            AgoKino.Margin = new Padding(4, 0, 4, 0);
+            AgoKino.Location = new Point(119, 9);
             AgoKino.Name = "AgoKino";
-            AgoKino.Size = new Size(620, 216);
+            AgoKino.Size = new Size(518, 180);
             AgoKino.TabIndex = 6;
             AgoKino.Text = "AgroKino";
             // 
             // LoginForm
             // 
-            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AntiqueWhite;
-            ClientSize = new Size(911, 798);
+            ClientSize = new Size(729, 638);
             Controls.Add(AgoKino);
             Controls.Add(btnReg);
             Controls.Add(label2);
@@ -136,7 +133,7 @@
             Controls.Add(txtPassword);
             Controls.Add(txtLogin);
             Controls.Add(btnLogin);
-            Margin = new Padding(4, 5, 4, 5);
+            Margin = new Padding(3, 4, 3, 4);
             Name = "LoginForm";
             Text = "LoginForm";
             ResumeLayout(false);

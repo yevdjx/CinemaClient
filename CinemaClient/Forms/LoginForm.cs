@@ -66,11 +66,5 @@ namespace CinemaClient.Forms
             var dlg = new RegistrationForm(_api);   // передаём тот же ApiService
             dlg.ShowDialog(this);
         }
-
-        private void txtPassword_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            txtPassword.UseSystemPasswordChar = true; // Это свойство заменяет символы точками
-            txtPassword.PasswordChar = '•'; // Можно использовать любой символ вместо точек
-        }
     }
 }

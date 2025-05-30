@@ -68,17 +68,6 @@
             sessionWork.TextDirection = ToolStripTextDirection.Horizontal;
             sessionWork.Click += sessionWork_Click;
             // 
-            // chTicketSostoyanie
-            // 
-            chTicketSostoyanie.BackColor = Color.PaleVioletRed;
-            chTicketSostoyanie.Font = new Font("Bahnschrift", 9F);
-            chTicketSostoyanie.ForeColor = Color.Black;
-            chTicketSostoyanie.Name = "chTicketSostoyanie";
-            chTicketSostoyanie.Size = new Size(185, 26);
-            chTicketSostoyanie.Text = "Состояние билетов";
-            chTicketSostoyanie.TextDirection = ToolStripTextDirection.Horizontal;
-            chTicketSostoyanie.Click += chTicketSostoyanie_Click;
-            // 
             // label1
             // 
             label1.AutoSize = true;
