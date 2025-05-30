@@ -5,252 +5,185 @@ using System.Net.Mail;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using System.Configuration;
+using System.Collections.Generic;
 using System.Linq;
-using System.Drawing;
+using CinemaClient.Services;
+
+// Убедитесь, что есть явные ссылки на пространства имен
+using iTextFont = iTextSharp.text.Font;
+using iTextImage = iTextSharp.text.Image;
+using iTextRectangle = iTextSharp.text.Rectangle;
 
 namespace CinemaClient.Services
 {
     public class TicketService
     {
-//        private readonly ApiService _apiService;
+        private readonly ApiService _apiService;
 
-//        public TicketService(ApiService apiService)
-//        {
-//            _apiService = apiService;
-//        }
+        public TicketService(ApiService apiService)
+        {
+            _apiService = apiService;
+        }
 
-//        public byte[] GeneratePdfTicket(TicketInfo ticketInfo)
-//        {
-//            using (var memoryStream = new MemoryStream())
-//            {
-//                // Размер страницы A6 (подходит для билета)
-//                var pageSize = new iTextSharp.text.Rectangle(288f, 432f); // 4x6 inches в points (1 inch = 72 points)
-//                var document = new Document(pageSize, 15, 15, 15, 15);
-//                PdfWriter.GetInstance(document, memoryStream);
-//                document.Open();
+        public byte[] GeneratePdfTicket(TicketInfo ticketInfo)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                var pageSize = PageSize.A5.Rotate();
+                var document = new Document(pageSize, 25, 25, 30, 30);
+                PdfWriter.GetInstance(document, memoryStream);
+                document.Open();
 
-//                try
-//                {
-//                    // Шрифты (поддержка кириллицы)
-//                    var baseFont = BaseFont.CreateFont(
-//                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "arial.ttf",
-//                        BaseFont.IDENTITY_H,
-//                        BaseFont.EMBEDDED);
+                try
+                {
+                    var baseFont = BaseFont.CreateFont(
+                        BaseFont.HELVETICA,
+                        BaseFont.CP1252,
+                        BaseFont.NOT_EMBEDDED);
 
-//                    var titleFont = new iTextSharp.text.Font(baseFont, 18, iTextSharp.text.Font.BOLD, new BaseColor(70, 70, 70));
-//                    var headerFont = new iTextSharp.text.Font(baseFont, 14, iTextSharp.text.Font.BOLD, BaseColor.BLACK);
-//                    var normalFont = new iTextSharp.text.Font(baseFont, 12, iTextSharp.text.Font.NORMAL, BaseColor.BLACK);
-//                    var smallFont = new iTextSharp.text.Font(baseFont, 10, iTextSharp.text.Font.NORMAL, new BaseColor(128, 128, 128));
+                    // Шрифты с явным указанием пространства имен
+                    var titleFont = new iTextFont(baseFont, 20, iTextFont.BOLD);
+                    var headerFont = new iTextFont(baseFont, 16, iTextFont.BOLD);
+                    var regularFont = new iTextFont(baseFont, 12, iTextFont.NORMAL);
+                    var boldFont = new iTextFont(baseFont, 12, iTextFont.BOLD);
+                    var smallFont = new iTextFont(baseFont, 10, iTextFont.NORMAL);
 
-//                    // Логотип кинотеатра (опционально)
-//                    string logoPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logo.png");
-//                    if (File.Exists(logoPath))
-//                    {
-//                        var logo = iTextSharp.text.Image.GetInstance(logoPath);
-//                        logo.ScaleToFit(100, 50);
-//                        logo.Alignment = Element.ALIGN_CENTER;
-//                        document.Add(logo);
-//                    }
+                    // Заголовок
+                    document.Add(new Paragraph("КИНОБИЛЕТ", titleFont)
+                    {
+                        Alignment = Element.ALIGN_CENTER,
+                        SpacingAfter = 20
+                    });
 
-//                    // Заголовок
-//                    var title = new Paragraph("ЭЛЕКТРОННЫЙ БИЛЕТ", titleFont)
-//                    {
-//                        Alignment = Element.ALIGN_CENTER,
-//                        SpacingAfter = 15
-//                    };
-//                    document.Add(title);
+                    // Картинка фильма
+                    if (ticketInfo.MovieImage != null && ticketInfo.MovieImage.Length > 0)
+                    {
+                        try
+                        {
+                            var movieImage = iTextImage.GetInstance(ticketInfo.MovieImage);
+                            movieImage.ScaleToFit(200, 200);
+                            movieImage.Alignment = Element.ALIGN_CENTER;
+                            document.Add(movieImage);
+                            document.Add(new Paragraph(" "));
+                        }
+                        catch { /* Игнорируем ошибки изображения */ }
+                    }
 
-//                    // Информация о фильме
-//                    var movieSection = new Paragraph("ФИЛЬМ", headerFont)
-//                    {
-//                        SpacingBefore = 10,
-//                        SpacingAfter = 5
-//                    };
-//                    document.Add(movieSection);
+                    // Информация о фильме
+                    document.Add(new Paragraph(ticketInfo.MovieTitle, headerFont)
+                    {
+                        Alignment = Element.ALIGN_CENTER,
+                        SpacingAfter = 15
+                    });
 
-//                    // Постер фильма
-//                    if (ticketInfo.MovieImage != null && ticketInfo.MovieImage.Length > 0)
-//                    {
-//                        var movieImage = iTextSharp.text.Image.GetInstance(ticketInfo.MovieImage);
-//                        movieImage.ScaleToFit(150, 200);
-//                        movieImage.Alignment = Element.ALIGN_CENTER;
-//                        document.Add(movieImage);
-//                    }
+                    // Таблица с деталями
+                    var table = new PdfPTable(2)
+                    {
+                        WidthPercentage = 100,
+                        SpacingBefore = 10f, // Явное указание float
+                        SpacingAfter = 20f     // Явное указание float
+                    };
 
-//                    var movieTitle = new Paragraph(ticketInfo.MovieTitle, normalFont)
-//                    {
-//                        Alignment = Element.ALIGN_CENTER,
-//                        SpacingAfter = 10
-//                    };
-//                    document.Add(movieTitle);
+                    AddTableRow(table, "Дата сеанса:", ticketInfo.SessionDate.ToString("dd.MM.yyyy"), boldFont, regularFont);
+                    AddTableRow(table, "Время сеанса:", ticketInfo.SessionTime, boldFont, regularFont);
+                    AddTableRow(table, "Зал:", ticketInfo.HallNumber, boldFont, regularFont);
 
-//                    // Информация о сеансе
-//                    var sessionSection = new Paragraph("СЕАНС", headerFont)
-//                    {
-//                        SpacingBefore = 10,
-//                        SpacingAfter = 5
-//                    };
-//                    document.Add(sessionSection);
+                    foreach (var seat in ticketInfo.Seats)
+                    {
+                        AddTableRow(table, "Место:", $"Ряд {seat.Row}, Место {seat.Number}", boldFont, regularFont);
+                    }
 
-//                    var sessionTable = new PdfPTable(2)
-//                    {
-//                        WidthPercentage = 100,
-//                        SpacingAfter = 10
-//                    };
-//                    sessionTable.DefaultCell.Border = Rectangle.NO_BORDER;
+                    AddTableRow(table, "Цена:", $"{ticketInfo.TotalPrice} руб.", boldFont, regularFont);
+                    AddTableRow(table, "ID билета:", ticketInfo.TicketId.ToString(), boldFont, smallFont);
 
-//                    sessionTable.AddCell(new Phrase("Дата:", normalFont));
-//                    sessionTable.AddCell(new Phrase(ticketInfo.SessionDate.ToString("dd.MM.yyyy"), normalFont));
-//                    sessionTable.AddCell(new Phrase("Время:", normalFont));
-//                    sessionTable.AddCell(new Phrase(ticketInfo.SessionTime.ToString("HH:mm"), normalFont));
-//                    sessionTable.AddCell(new Phrase("Зал:", normalFont));
-//                    sessionTable.AddCell(new Phrase(ticketInfo.HallNumber.ToString(), normalFont));
-//                    document.Add(sessionTable);
+                    document.Add(table);
 
-//                    // Информация о местах
-//                    var seatsSection = new Paragraph("МЕСТА", headerFont)
-//                    {
-//                        SpacingBefore = 10,
-//                        SpacingAfter = 5
-//                    };
-//                    document.Add(seatsSection);
+                    // Подпись
+                    document.Add(new Paragraph("Предъявите этот билет на входе", smallFont)
+                    {
+                        Alignment = Element.ALIGN_CENTER,
+                        SpacingBefore = 20f
+                    });
+                }
+                finally
+                {
+                    document.Close();
+                }
+                return memoryStream.ToArray();
+            }
+        }
 
-//                    var seatsTable = new PdfPTable(2)
-//                    {
-//                        WidthPercentage = 100,
-//                        SpacingAfter = 10
-//                    };
-//                    seatsTable.DefaultCell.Border = Rectangle.NO_BORDER;
+        private void AddTableRow(PdfPTable table, string label, string value, iTextFont labelFont, iTextFont valueFont)
+        {
+            table.AddCell(new PdfPCell(new Phrase(label, labelFont))
+            {
+                Border = iTextRectangle.NO_BORDER,
+                HorizontalAlignment = Element.ALIGN_RIGHT,
+                Padding = 5f
+            });
+            table.AddCell(new PdfPCell(new Phrase(value, valueFont))
+            {
+                Border = iTextRectangle.NO_BORDER,
+                HorizontalAlignment = Element.ALIGN_LEFT,
+                Padding = 5f
+            });
+        }
 
-//                    foreach (var seat in ticketInfo.Seats)
-//                    {
-//                        seatsTable.AddCell(new Phrase($"Ряд {seat.Row}, Место {seat.Number}:", normalFont));
-//                        seatsTable.AddCell(new Phrase($"{ticketInfo.PricePerSeat} руб.", normalFont));
-//                    }
-//                    document.Add(seatsTable);
+        public void SendEmailWithTicket(string email, byte[] ticketPdf, TicketInfo ticketInfo)
+        {
+            try
+            {
+                using (var smtpClient = new SmtpClient("smtp.gmail.com")
+                {
+                    Port = 587,
+                    Credentials = new NetworkCredential("your-cinema-email@gmail.com", "your-password"),
+                    EnableSsl = true,
+                })
+                {
+                    var mailMessage = new MailMessage
+                    {
+                        From = new MailAddress("your-cinema-email@gmail.com", "Кинотеатр"),
+                        Subject = $"Ваш билет на фильм {ticketInfo.MovieTitle}",
+                        Body = $"Уважаемый зритель!\n\n" +
+                               $"Ваш билет на фильм «{ticketInfo.MovieTitle}» прикреплен к этому письму.\n\n" +
+                               $"Дата: {ticketInfo.SessionDate:dd.MM.yyyy}\n" +
+                               $"Время: {ticketInfo.SessionTime}\n" +
+                               $"Зал: {ticketInfo.HallNumber}\n" +
+                               $"Места: {string.Join(", ", ticketInfo.Seats.Select(s => $"Ряд {s.Row}, Место {s.Number}"))}\n\n" +
+                               "Приятного просмотра!",
+                        IsBodyHtml = false,
+                    };
 
-//                    // Итого
-//                    var total = new Paragraph($"ИТОГО: {ticketInfo.TotalPrice} руб.",
-//                        new iTextSharp.text.Font(baseFont, 14, iTextSharp.text.Font.BOLD, new BaseColor(255, 0, 0)))
-//                    {
-//                        Alignment = Element.ALIGN_RIGHT,
-//                        SpacingBefore = 10
-//                    };
-//                    document.Add(total);
+                    mailMessage.To.Add(email);
 
-//                    // ID билета (скрыто внизу)
-//                    var ticketId = new Paragraph($"ID: {ticketInfo.TicketId}", smallFont)
-//                    {
-//                        Alignment = Element.ALIGN_CENTER,
-//                        SpacingBefore = 20
-//                    };
-//                    document.Add(ticketId);
+                    using (var stream = new MemoryStream(ticketPdf))
+                    {
+                        mailMessage.Attachments.Add(new Attachment(
+                            stream,
+                            $"Билет_{ticketInfo.MovieTitle}_{DateTime.Now:yyyyMMdd}.pdf",
+                            "application/pdf"));
 
-//                    // Предупреждение
-//                    var warning = new Paragraph("* Предъявите этот билет на входе. Приятного просмотра!", smallFont)
-//                    {
-//                        Alignment = Element.ALIGN_CENTER,
-//                        SpacingBefore = 10
-//                    };
-//                    document.Add(warning);
-//                }
-//                finally
-//                {
-//                    document.Close();
-//                }
-//                return memoryStream.ToArray();
-//            }
-//        }
-
-//        public void SendEmailWithTicket(string recipientEmail, byte[] ticketPdf, TicketInfo ticketInfo)
-//        {
-//            SmtpClient smtpClient = null;
-//            MailMessage mailMessage = null;
-
-//            try
-//            {
-//                // Настройки SMTP из конфига
-//                var smtpHost = ConfigurationManager.AppSettings["SmtpHost"];
-//                var smtpPort = int.Parse(ConfigurationManager.AppSettings["SmtpPort"]);
-//                var smtpUsername = ConfigurationManager.AppSettings["SmtpUsername"];
-//                var smtpPassword = ConfigurationManager.AppSettings["SmtpPassword"];
-//                var smtpFromEmail = ConfigurationManager.AppSettings["SmtpFromEmail"];
-//                var smtpFromName = ConfigurationManager.AppSettings["SmtpFromName"];
-//                var smtpEnableSsl = bool.Parse(ConfigurationManager.AppSettings["SmtpEnableSsl"]);
-
-//                // Создаем SMTP клиент
-//                smtpClient = new SmtpClient(smtpHost)
-//                {
-//                    Port = smtpPort,
-//                    Credentials = new NetworkCredential(smtpUsername, smtpPassword),
-//                    EnableSsl = smtpEnableSsl
-//                };
-
-//                // Создаем сообщение
-//                mailMessage = new MailMessage
-//                {
-//                    From = new MailAddress(smtpFromEmail, smtpFromName),
-//                    Subject = $"Ваш билет на фильм «{ticketInfo.MovieTitle}»",
-//                    Body = $@"Уважаемый зритель!
-
-//                    Ваши билеты на фильм «{ticketInfo.MovieTitle}» прикреплены к этому письму.
-
-//                    Детали сеанса:
-//                    Дата: {ticketInfo.SessionDate:dd.MM.yyyy}
-//                    Время: {ticketInfo.SessionTime:HH:mm}
-//                    Зал: {ticketInfo.HallNumber}
-//                    Места: {string.Join(", ", ticketInfo.Seats.Select(s => $"Ряд {s.Row}, Место {s.Number}"))}
-//                    Сумма: {ticketInfo.TotalPrice} руб.
-
-//                    Пожалуйста, сохраните это письмо до посещения кинотеатра.
-//                    Приятного просмотра!
-
-//                    С уважением,
-//                    Кинотеатр «»",
-//                    IsBodyHtml = false
-//                };
-
-//                mailMessage.To.Add(recipientEmail);
-
-//                // Добавляем PDF вложение
-//                using (var pdfStream = new MemoryStream(ticketPdf))
-//                {
-//                    mailMessage.Attachments.Add(new Attachment(
-//                        pdfStream,
-//                        $"Билет_{ticketInfo.MovieTitle}_{ticketInfo.SessionDate:yyyyMMdd}.pdf",
-//                        "application/pdf"));
-
-//                    smtpClient.Send(mailMessage);
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                throw new ApplicationException("Не удалось отправить билеты на email. Пожалуйста, проверьте ваш email адрес и повторите попытку.", ex);
-//            }
-//            finally
-//            {
-//                mailMessage?.Dispose();
-//                smtpClient?.Dispose();
-//            }
-//        }
+                        smtpClient.Send(mailMessage);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка отправки email: {ex.Message}");
+                throw;
+            }
+        }
     }
 
-//    public class TicketInfo
-//    {
-//        public string TicketId { get; set; } = Guid.NewGuid().ToString("N").ToUpper();
-//        public string MovieTitle { get; set; }
-//        public byte[] MovieImage { get; set; }
-//        public DateTime SessionDate { get; set; }
-//        public TimeSpan SessionTime { get; set; }
-//        public int HallNumber { get; set; }
-//        public SeatInfo[] Seats { get; set; }
-//        public decimal PricePerSeat { get; set; }
-//        public decimal TotalPrice => Seats.Length * PricePerSeat;
-//    }
-
-//    public class SeatInfo
-//    {
-//        public int Row { get; set; }
-//        public int Number { get; set; }
-//    }
+    public class TicketInfo
+    {
+        public Guid TicketId { get; set; } = Guid.NewGuid();
+        public string MovieTitle { get; set; }
+        public byte[] MovieImage { get; set; }
+        public DateTime SessionDate { get; set; }
+        public string SessionTime { get; set; }
+        public string HallNumber { get; set; }
+        public List<SeatDto> Seats { get; set; }
+        public decimal TotalPrice { get; set; }
+    }
 }

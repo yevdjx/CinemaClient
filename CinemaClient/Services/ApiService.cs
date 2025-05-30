@@ -80,6 +80,7 @@ public class ApiService
     }
 
 
+
     public async Task<Image> GetMovieImageAsync(int movieId)
     {
         try
@@ -375,6 +376,30 @@ public class ApiService
 
     }
 
+    // Добавьте в CinemaClient.Services.ApiService
+    public async Task<IEnumerable<TicketDto>> GetUserTicketsAsync()
+    {
+        try
+        {
+            var response = await _http.GetAsync("/user/tickets");
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<IEnumerable<TicketDto>>()
+                       ?? Enumerable.Empty<TicketDto>();
+            }
+            return Enumerable.Empty<TicketDto>();
+        }
+        catch
+        {
+            return Enumerable.Empty<TicketDto>();
+        }
+    }
+
+    //public async Task<bool> ConfirmBookingAsync(int ticketId)
+    //{
+    //    var response = await _http.PostAsync($"/tickets/{ticketId}/confirm", null);
+    //    return response.IsSuccessStatusCode;
+    //}
     public async Task<bool> IsHallAvailableAsync(string hallId, DateTime sessionDateTime, int? currentSessionId = null)
     {
         try
@@ -449,3 +474,4 @@ public record SessionAdminDto(
     DateTime sessionDateTime,
     decimal sessionPrice
 );
+
