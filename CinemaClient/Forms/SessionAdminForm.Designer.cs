@@ -32,6 +32,10 @@
             label1 = new Label();
             sessionList = new DataGridView();
             groupBox1 = new GroupBox();
+            label8 = new Label();
+            label7 = new Label();
+            tMinutes = new TextBox();
+            tHours = new TextBox();
             comboFilm = new ComboBox();
             comboHall = new ComboBox();
             takeTime = new DateTimePicker();
@@ -44,6 +48,8 @@
             label4 = new Label();
             label3 = new Label();
             label2 = new Label();
+            label9 = new Label();
+            label10 = new Label();
             groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)sessionList).BeginInit();
             groupBox1.SuspendLayout();
@@ -84,6 +90,12 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(label10);
+            groupBox1.Controls.Add(label9);
+            groupBox1.Controls.Add(label8);
+            groupBox1.Controls.Add(label7);
+            groupBox1.Controls.Add(tMinutes);
+            groupBox1.Controls.Add(tHours);
             groupBox1.Controls.Add(comboFilm);
             groupBox1.Controls.Add(comboHall);
             groupBox1.Controls.Add(takeTime);
@@ -101,6 +113,45 @@
             groupBox1.Size = new Size(1006, 401);
             groupBox1.TabIndex = 5;
             groupBox1.TabStop = false;
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Font = new Font("Bahnschrift Condensed", 14F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            label8.ForeColor = Color.DeepPink;
+            label8.Location = new Point(453, 271);
+            label8.Name = "label8";
+            label8.Size = new Size(20, 34);
+            label8.TabIndex = 22;
+            label8.Text = ":";
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Location = new Point(227, 296);
+            label7.Name = "label7";
+            label7.Size = new Size(0, 25);
+            label7.TabIndex = 21;
+            // 
+            // tMinutes
+            // 
+            tMinutes.BackColor = Color.Pink;
+            tMinutes.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            tMinutes.ForeColor = Color.Maroon;
+            tMinutes.Location = new Point(488, 268);
+            tMinutes.Name = "tMinutes";
+            tMinutes.Size = new Size(60, 36);
+            tMinutes.TabIndex = 20;
+            // 
+            // tHours
+            // 
+            tHours.BackColor = Color.Pink;
+            tHours.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            tHours.ForeColor = Color.Maroon;
+            tHours.Location = new Point(355, 268);
+            tHours.Name = "tHours";
+            tHours.Size = new Size(60, 36);
+            tHours.TabIndex = 19;
             // 
             // comboFilm
             // 
@@ -170,7 +221,7 @@
             takePrice.BackColor = Color.Pink;
             takePrice.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
             takePrice.ForeColor = Color.Maroon;
-            takePrice.Location = new Point(293, 290);
+            takePrice.Location = new Point(293, 326);
             takePrice.Name = "takePrice";
             takePrice.Size = new Size(329, 36);
             takePrice.TabIndex = 11;
@@ -180,7 +231,7 @@
             label6.AutoSize = true;
             label6.Font = new Font("Bahnschrift Condensed", 14F, FontStyle.Regular, GraphicsUnit.Point, 204);
             label6.ForeColor = Color.DeepPink;
-            label6.Location = new Point(34, 292);
+            label6.Location = new Point(34, 328);
             label6.Name = "label6";
             label6.Size = new Size(135, 34);
             label6.TabIndex = 6;
@@ -230,6 +281,28 @@
             label2.TabIndex = 2;
             label2.Text = "Сеанс";
             // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Font = new Font("Bahnschrift Condensed", 14F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            label9.ForeColor = Color.DeepPink;
+            label9.Location = new Point(421, 270);
+            label9.Name = "label9";
+            label9.Size = new Size(26, 34);
+            label9.TabIndex = 23;
+            label9.Text = "ч";
+            // 
+            // label10
+            // 
+            label10.AutoSize = true;
+            label10.Font = new Font("Bahnschrift Condensed", 14F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            label10.ForeColor = Color.DeepPink;
+            label10.Location = new Point(545, 271);
+            label10.Name = "label10";
+            label10.Size = new Size(49, 34);
+            label10.TabIndex = 24;
+            label10.Text = "мин";
+            // 
             // SessionAdminForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -268,5 +341,11 @@
         private DateTimePicker takeTime;
         private ComboBox comboFilm;
         private ComboBox comboHall;
+        private Label label8;
+        private Label label7;
+        private TextBox tMinutes;
+        private TextBox tHours;
+        private Label label10;
+        private Label label9;
     }
 }

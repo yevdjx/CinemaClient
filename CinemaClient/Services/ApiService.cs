@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
+using static System.Net.WebRequestMethods;
 
 
 namespace CinemaClient.Services;
@@ -311,6 +312,82 @@ public class ApiService
          => (await _http.DeleteAsync($"/booking/book/{ ticketId }")).StatusCode == System.Net.HttpStatusCode.OK ? 0 : -1;
 
     private record LoginResponse(string Token);
+
+
+
+
+    // СУАНСЫ
+
+    // Добавьте эти методы в класс ApiService
+    public async Task<IEnumerable<SessionAdminDto>> GetSessionsAdminAsync()
+    {
+        return await _http.GetFromJsonAsync<IEnumerable<SessionAdminDto>>("/admin/sessions")
+               ?? Enumerable.Empty<SessionAdminDto>();
+    }
+
+    public async Task<(bool Success, string? Error)> CreateSessionAsync(
+        int hallId,
+        int movieId,
+        DateTime sessionDateTime,
+        int price)
+    {
+        var session = new
+        {
+            hallId,
+            movieId,
+            sessionDateTime,
+            sessionPrice = price
+        };
+
+        var response = await _http.PostAsJsonAsync("/admin/sessions", session);
+
+        if (response.IsSuccessStatusCode)
+            return (true, null);
+
+        var error = await response.Content.ReadAsStringAsync();
+        return (false, $"Ошибка: {response.StatusCode} - {error}");
+    }
+
+    public async Task<(bool Success, string? Error)> UpdateSessionAsync(
+        int sessionId,
+        int hallId,
+        int movieId,
+        DateTime sessionDateTime,
+        int price)
+    {
+        var session = new
+        {
+            sessionId,
+            hallId,
+            movieId,
+            sessionDateTime,
+            sessionPrice = price
+        };
+
+        var response = await _http.PutAsJsonAsync($"/admin/sessions/{sessionId}", session);
+
+        if (response.IsSuccessStatusCode)
+            return (true, null);
+
+        var error = await response.Content.ReadAsStringAsync();
+        return (false, $"Ошибка: {response.StatusCode} - {error}");
+
+
+    }
+
+    public async Task<bool> IsHallAvailableAsync(string hallId, DateTime sessionDateTime, int? currentSessionId = null)
+    {
+        try
+        {
+            var response = await _http.GetAsync($"/admin/halls/{hallId}/available?sessionDateTime={sessionDateTime:o}&currentSessionId={currentSessionId}");
+            return response.IsSuccessStatusCode && await response.Content.ReadFromJsonAsync<bool>();
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
 }
 
 public record SessionDto(
@@ -354,3 +431,21 @@ public record KorzinaDto(
     string FullSessionInfo
 );
 
+
+// сеансы
+
+// Добавьте эти DTO в ApiService.cs
+public record HallDto(
+    int hallId,
+    string hallNumber
+);
+public record SessionAdminDto(
+    int sessionId,
+    int hallId,
+    string hallNumber,
+    int movieId,
+    string movieTitle,
+    string movieImage,
+    DateTime sessionDateTime,
+    decimal sessionPrice
+);

@@ -1,8 +1,11 @@
-﻿using CinemaClient.Services;
+﻿
+using CinemaClient.Services;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+using static System.ComponentModel.Design.ObjectSelectorEditor;
 
 namespace CinemaClient.Forms
 {
@@ -10,7 +13,9 @@ namespace CinemaClient.Forms
     {
         private readonly ApiService _api;
         private int? _currentSessionId = null;
-        private List<SessionDto> _currentSessions = new List<SessionDto>();
+        private List<SessionAdminDto> _currentSessions = new List<SessionAdminDto>();
+        private List<MovieDto> _movies = new List<MovieDto>();
+        private List<HallDto> _halls = new List<HallDto>();
 
         public SessionAdminForm(ApiService api)
         {
@@ -18,23 +23,38 @@ namespace CinemaClient.Forms
             _api = api;
 
             SetupEventHandlers();
-            LoadHallsAndMovies();
-            LoadSessionList();
+            LoadInitialData();
+
+            this.Resize += (sender, e) => AdjustDataGridViewLayout();
+            sessionList.SizeChanged += (sender, e) => AdjustDataGridViewLayout();
         }
 
         private void SetupEventHandlers()
         {
-            // Изменяем обработчик для клика по ячейкам
-            sessionList.CellClick += OnSessionCellClicked;
+            sessionList.SelectionChanged += OnSessionSelected;
             sohrButton.Click += OnSaveClicked;
             otmenButton.Click += OnCancelClicked;
             delButton.Click += OnDeleteClicked;
+            tHours.KeyPress += OnTimeInput;
+            tMinutes.KeyPress += OnTimeInput;
             takePrice.KeyPress += OnPriceInput;
+
+            sessionList.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            sessionList.MultiSelect = false;
+        }
+
+
+        private void OnTimeInput(object sender, KeyPressEventArgs e)
+        {
+            e.Handled = !(char.IsDigit(e.KeyChar) || char.IsControl(e.KeyChar));
         }
 
         private void OnPriceInput(object sender, KeyPressEventArgs e)
         {
-            e.Handled = !(char.IsDigit(e.KeyChar) || e.KeyChar == ',' || char.IsControl(e.KeyChar));
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
         }
 
         private void ResetFormFields()
@@ -43,6 +63,8 @@ namespace CinemaClient.Forms
             comboHall.SelectedIndex = -1;
             comboFilm.SelectedIndex = -1;
             takeTime.Value = DateTime.Now;
+            tHours.Text = "0";
+            tMinutes.Text = "0";
             takePrice.Clear();
             sessionList.ClearSelection();
         }
@@ -59,17 +81,30 @@ namespace CinemaClient.Forms
         private bool ConfirmAction(string question) =>
             MessageBox.Show(question, "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
 
-        private async void LoadHallsAndMovies()
+        private async void LoadInitialData()
         {
             try
             {
-                // Заполняем comboHall значениями 1 и 2
-                comboHall.Items.AddRange(new object[] { "1", "2" });
+                // Жестко закодированный список залов
+                _halls = new List<HallDto>
+                {
+                    new HallDto(1, "1"),
+                    new HallDto(2, "2"),
+                    new HallDto(3, "3"),
+                    new HallDto(4, "4")
+                };
+                comboHall.DataSource = _halls;
+                comboHall.DisplayMember = "hallNumber";
+                comboHall.ValueMember = "hallId";
 
-                var movies = await _api.GetMoviesAsync();
-                comboFilm.DataSource = movies.ToList();
+                // Загружаем фильмы
+                _movies = (await _api.GetMoviesAsync()).ToList();
+                comboFilm.DataSource = _movies;
                 comboFilm.DisplayMember = "movieTitle";
                 comboFilm.ValueMember = "movieId";
+
+                // Загружаем сеансы
+                await LoadSessionsList();
             }
             catch (Exception ex)
             {
@@ -77,29 +112,25 @@ namespace CinemaClient.Forms
             }
         }
 
-        private async void LoadSessionList()
+        private async Task LoadSessionsList()
         {
             try
             {
-                _currentSessions = (await _api.GetSessionsAsync()).ToList();
+                _currentSessions = (await _api.GetSessionsAdminAsync()).ToList();
                 sessionList.DataSource = _currentSessions;
 
                 if (sessionList.Columns.Count > 0)
                 {
-                    sessionList.Columns["SessionId"].Visible = false;
-                    sessionList.Columns["SessionDateTime"].HeaderText = "Время сеанса";
-                    sessionList.Columns["HallNumber"].HeaderText = "Номер зала";
-                    sessionList.Columns["MovieTitle"].HeaderText = "Название фильма";
-                    sessionList.Columns["Price"].HeaderText = "Цена билета";
-
-                    // Делаем все столбцы кликабельными
-                    foreach (DataGridViewColumn column in sessionList.Columns)
-                    {
-                        column.SortMode = DataGridViewColumnSortMode.NotSortable;
-                    }
+                    sessionList.Columns["sessionId"].Visible = false;
+                    sessionList.Columns["hallNumber"].HeaderText = "Зал";
+                    sessionList.Columns["movieTitle"].HeaderText = "Фильм";
+                    sessionList.Columns["sessionDateTime"].HeaderText = "Дата и время";
+                    sessionList.Columns["sessionPrice"].HeaderText = "Цена билета";
+                    sessionList.Columns["movieImage"].Visible = false; // Скрываем столбец с изображением
                 }
 
                 ResetFormFields();
+                AdjustDataGridViewLayout();
             }
             catch (Exception ex)
             {
@@ -107,39 +138,25 @@ namespace CinemaClient.Forms
             }
         }
 
-        private void OnSessionCellClicked(object sender, DataGridViewCellEventArgs e)
+
+        async private void OnSessionSelected(object sender, EventArgs e)
         {
-            // Игнорируем клики по заголовкам
-            if (e.RowIndex < 0) return;
-
-            // Получаем выбранную строку
-            var selectedRow = sessionList.Rows[e.RowIndex];
-
-            // Проверяем, что строка содержит данные
-            if (selectedRow.DataBoundItem == null)
+            if (sessionList.SelectedRows.Count == 0 ||
+                sessionList.SelectedRows[0].Index < 0 ||
+                sessionList.SelectedRows[0].DataBoundItem == null)
             {
                 ResetFormFields();
                 return;
             }
 
-            var selectedSession = (SessionDto)selectedRow.DataBoundItem;
-            _currentSessionId = selectedSession.SessionId;
+            var selected = (SessionAdminDto)sessionList.SelectedRows[0].DataBoundItem;
 
-            // Заполняем поля формы
-            comboHall.SelectedItem = selectedSession.HallNumber;
+            comboHall.SelectedValue = selected.hallId;
+            comboFilm.SelectedValue = selected.movieId;
+            takeTime.Value = selected.sessionDateTime.Date;
+            tHours.Text = selected.sessionDateTime.Hour.ToString();
+            tMinutes.Text = selected.sessionDateTime.Minute.ToString();
 
-            // Находим фильм по названию (так как SelectedValue работает с ID)
-            foreach (var item in comboFilm.Items)
-            {
-                if (item is MovieDto movie && movie.movieTitle == selectedSession.MovieTitle)
-                {
-                    comboFilm.SelectedItem = item;
-                    break;
-                }
-            }
-
-            takeTime.Value = selectedSession.SessionDateTime;
-            takePrice.Text = selectedSession.Price.ToString("0.00");
         }
 
         private async void OnSaveClicked(object sender, EventArgs e)
@@ -148,19 +165,75 @@ namespace CinemaClient.Forms
 
             try
             {
-                var hallNumber = comboHall.SelectedItem.ToString();
-                var movieTitle = ((MovieDto)comboFilm.SelectedItem).movieTitle;
-                var sessionTime = takeTime.Value;
-                var price = decimal.Parse(takePrice.Text);
+                var hallId = (int)comboHall.SelectedValue;
+                var movieId = (int)comboFilm.SelectedValue;
+                var date = takeTime.Value.Date;
+                var hours = int.Parse(tHours.Text);
+                var minutes = int.Parse(tMinutes.Text);
+                var price = int.Parse(takePrice.Text);
+
+                var sessionDateTime = date.AddHours(hours).AddMinutes(minutes);
+
+                // Проверка что дата в будущем
+                if (sessionDateTime <= DateTime.Now)
+                {
+                    ShowWarning("Дата и время сеанса должны быть в будущем");
+                    return;
+                }
+
+                // Получаем все сеансы для выбранного зала на эту дату
+                var sessionsInHall = _currentSessions
+                    .Where(s => s.hallId == hallId &&
+                               s.sessionDateTime.Date == sessionDateTime.Date &&
+                               s.sessionId != _currentSessionId)
+                    .ToList();
+
+                // Получаем длительность выбранного фильма
+                var selectedMovie = _movies.FirstOrDefault(m => m.movieId == movieId);
+                if (selectedMovie == null)
+                {
+                    ShowError("Выбранный фильм не найден");
+                    return;
+                }
+
+                var movieDuration = TimeSpan.FromMinutes(selectedMovie.movieDuration);
+
+                // Проверяем пересечение с другими сеансами
+                foreach (var existingSession in sessionsInHall)
+                {
+                    var existingMovie = _movies.FirstOrDefault(m => m.movieId == existingSession.movieId);
+                    if (existingMovie == null) continue;
+
+                    var existingDuration = TimeSpan.FromMinutes(existingMovie.movieDuration);
+                    var existingStart = existingSession.sessionDateTime;
+                    var existingEnd = existingStart.Add(existingDuration);
+                    var newEnd = sessionDateTime.Add(movieDuration);
+
+                    // Проверяем пересечение временных интервалов
+                    if (sessionDateTime < existingEnd && newEnd > existingStart)
+                    {
+                        ShowWarning($"Зал занят с {existingStart:HH:mm} до {existingEnd:HH:mm}");
+                        return;
+                    }
+                }
 
                 var result = _currentSessionId.HasValue
-                    ? await _api.UpdateSessionAsync(_currentSessionId.Value, hallNumber, movieTitle, sessionTime, price)
-                    : await _api.CreateSessionAsync(hallNumber, movieTitle, sessionTime, price);
+                    ? await _api.UpdateSessionAsync(
+                        _currentSessionId.Value,
+                        hallId,
+                        movieId,
+                        sessionDateTime,
+                        price)
+                    : await _api.CreateSessionAsync(
+                        hallId,
+                        movieId,
+                        sessionDateTime,
+                        price);
 
                 if (result.Success)
                 {
                     ShowSuccess(_currentSessionId.HasValue ? "Сеанс обновлен" : "Сеанс добавлен");
-                    LoadSessionList();
+                    await LoadSessionsList();
                 }
                 else
                 {
@@ -175,32 +248,56 @@ namespace CinemaClient.Forms
 
         private bool ValidateForm()
         {
-            if (comboHall.SelectedIndex == -1)
+            if (comboHall.SelectedItem == null)
             {
-                ShowWarning("Выберите номер зала");
+                ShowWarning("Выберите зал");
                 return false;
             }
 
-            if (comboFilm.SelectedIndex == -1)
+            if (comboFilm.SelectedItem == null)
             {
                 ShowWarning("Выберите фильм");
                 return false;
             }
 
-            if (!decimal.TryParse(takePrice.Text, out decimal price) || price <= 0)
+            if (!int.TryParse(tHours.Text, out int hours) || hours < 0 || hours > 23)
+            {
+                ShowWarning("Часы должны быть числом от 0 до 23");
+                return false;
+            }
+
+            if (!int.TryParse(tMinutes.Text, out int minutes) || minutes < 0 || minutes > 59)
+            {
+                ShowWarning("Минуты должны быть числом от 0 до 59");
+                return false;
+            }
+
+            if (!int.TryParse(takePrice.Text, out int price) || price <= 0)
             {
                 ShowWarning("Цена должна быть положительным числом");
                 return false;
             }
 
-            // Проверка, что выбранные дата и время меньше текущих даты и времени
-            if (takeTime.Value < DateTime.Now)
-            {
-                ShowWarning("Выбранные дата и время должны быть больше текущих даты и времени");
-                return false;
-            }
-
             return true;
+        }
+
+        private async Task<(bool Success, string? Error)> UpdateExistingSession(int hallId, int movieId, DateTime sessionDateTime, int price)
+        {
+            return await _api.UpdateSessionAsync(
+                _currentSessionId.Value,
+                hallId,
+                movieId,
+                sessionDateTime,
+                price);
+        }
+
+        private async Task<(bool Success, string? Error)> CreateNewSession(int hallId, int movieId, DateTime sessionDateTime, int price)
+        {
+            return await _api.CreateSessionAsync(
+                hallId,
+                movieId,
+                sessionDateTime,
+                price);
         }
 
         private void OnCancelClicked(object sender, EventArgs e)
@@ -223,11 +320,38 @@ namespace CinemaClient.Forms
                 if (success)
                 {
                     ShowSuccess("Сеанс удален");
-                    LoadSessionList();
+                    await LoadSessionsList();
                 }
                 else
                 {
                     ShowError(error ?? "Ошибка при удалении");
+                }
+            }
+        }
+
+        private void AdjustDataGridViewLayout()
+        {
+            if (sessionList.Rows.Count == 0 || sessionList.Columns.Count == 0)
+                return;
+
+            int rowHeight = sessionList.Height / sessionList.Rows.Count;
+
+            foreach (DataGridViewRow row in sessionList.Rows)
+            {
+                row.Height = rowHeight;
+            }
+
+            int visibleColumnsCount = sessionList.Columns.Cast<DataGridViewColumn>()
+                .Count(c => c.Visible);
+            if (visibleColumnsCount == 0) return;
+
+            int columnWidth = sessionList.Width / visibleColumnsCount;
+
+            foreach (DataGridViewColumn column in sessionList.Columns)
+            {
+                if (column.Visible)
+                {
+                    column.Width = columnWidth;
                 }
             }
         }
