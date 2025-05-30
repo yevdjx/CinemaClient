@@ -31,8 +31,21 @@ namespace CinemaClient.Forms
             this.StartPosition = FormStartPosition.CenterScreen;
 
             // Основной контейнер с прокруткой
-            var mainPanel = new Panel { Dock = DockStyle.Fill, AutoScroll = true };
+            var mainPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                AutoScroll = true,
+                AutoSize = false // Важно отключить AutoSize
+            };
             this.Controls.Add(mainPanel);
+
+            // Внутренний контейнер для содержимого
+            var contentPanel = new Panel
+            {
+                Width = mainPanel.ClientSize.Width - 20, // Оставляем место для скроллбара
+                AutoSize = true // Включаем AutoSize для автоматического определения высоты
+            };
+            mainPanel.Controls.Add(contentPanel);
 
             // Заголовок
             var titleLabel = new Label
@@ -45,11 +58,15 @@ namespace CinemaClient.Forms
                 BackColor = Color.PaleVioletRed,
                 ForeColor = Color.White
             };
-            mainPanel.Controls.Add(titleLabel);
+            contentPanel.Controls.Add(titleLabel);
 
             // Группировка билетов
-            var groupPanel = new Panel { Dock = DockStyle.Fill };
-            mainPanel.Controls.Add(groupPanel);
+            var groupPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                AutoSize = true // Включаем AutoSize
+            };
+            contentPanel.Controls.Add(groupPanel);
         }
 
         private async void LoadTickets()
@@ -69,7 +86,8 @@ namespace CinemaClient.Forms
         private void DisplayTickets()
         {
             var mainPanel = (Panel)this.Controls[0];
-            var groupPanel = (Panel)mainPanel.Controls[1];
+            var contentPanel = (Panel)mainPanel.Controls[0];
+            var groupPanel = (Panel)contentPanel.Controls[1]; // Теперь groupPanel - второй элемент в contentPanel
             groupPanel.Controls.Clear();
 
             if (!_userTickets.Any())
@@ -217,6 +235,7 @@ namespace CinemaClient.Forms
                     FlatStyle = FlatStyle.Flat,
                     Tag = ticket
                 };
+                sendButton.FlatStyle = FlatStyle.Standard;
                 sendButton.FlatAppearance.BorderSize = 0;
                 sendButton.Click += SendButton_Click;
                 card.Controls.Add(sendButton);
