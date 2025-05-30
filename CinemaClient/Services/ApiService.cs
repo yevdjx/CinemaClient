@@ -307,11 +307,19 @@ public class ApiService
         => (await _http.PostAsJsonAsync("/booking/buy", new { ticketId }))
            .StatusCode == System.Net.HttpStatusCode.OK ? 0 : -1;
 
+    public async Task<int> CancelBookingAsync(int ticketId)
+         => (await _http.DeleteAsync($"/booking/book/{ ticketId }")).StatusCode == System.Net.HttpStatusCode.OK ? 0 : -1;
+
     private record LoginResponse(string Token);
 }
 
-public record SessionDto(int SessionId, DateTime SessionDateTime,
-                         string HallNumber, string MovieTitle, byte[] MovieImage, decimal Price);
+public record SessionDto(
+    int SessionId, 
+    DateTime SessionDateTime,
+    string HallNumber,
+    string MovieTitle, 
+    byte[] MovieImage, 
+    decimal Price);
 
 
 public record SeatDto(int TicketId, int Row, int Number, string Status);

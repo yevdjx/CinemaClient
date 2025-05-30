@@ -217,5 +217,4 @@ namespace CinemaClient.Forms
             }
         }
     }
-
 }

@@ -156,6 +156,20 @@ namespace CinemaClient.Forms
             bookButton.Click += BookSelectedSeats_Click;
             mainPanel.Controls.Add(bookButton);
 
+            var cancelButton = new Button
+            {
+                Dock = DockStyle.Bottom,
+                Height = 50,
+                Text = "Отменить бронь выбранных мест",
+                BackColor = Color.DeepPink,
+                ForeColor = Color.White,
+                Font = new Font("Bahnschrift", 10, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                FlatAppearance = { BorderSize = 0 }
+            };
+            cancelButton.Click += CancelSelectedSeats_Click;
+            mainPanel.Controls.Add(cancelButton);
+
             AddLegendItem(legendPanel, "Свободно", Color.White, 20);
             AddLegendItem(legendPanel, "Выбрано", Color.MediumVioletRed, 180);
             AddLegendItem(legendPanel, "Бронь", Color.FromArgb(220, 160, 220), 340);
@@ -287,6 +301,76 @@ namespace CinemaClient.Forms
             }
         }
 
+        private async void CancelSelectedSeats_Click(object sender, EventArgs e)
+        {
+            if (_isProcessing) return;
+            _isProcessing = true;
+
+            try
+            {
+                if (_selectedSeats.Count == 0)
+                {
+                    MessageBox.Show("Выберите хотя бы одно место!", "Внимание",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                bool allBought = true;
+                foreach (var btn in _selectedSeats.ToList())
+                {
+                    var oldSeat = (SeatDto)btn.Tag;
+
+                    // Пытаемся купить место
+                    if (await _api.CancelBookingAsync(oldSeat.TicketId) != 0)
+                    {
+                        allBought = false;
+
+                        // Если не удалось купить - возвращаем первоначальный вид
+                        if (oldSeat.Status == "booked")
+                        {
+                            btn.BackColor = Color.FromArgb(220, 160, 220); // Цвет брони
+                            btn.ForeColor = Color.White;
+                        }
+                        else if (oldSeat.Status == "sold")
+                        {
+                            btn.BackColor = Color.LightGray; // Цвет брони
+                            btn.ForeColor = Color.White;
+                        }
+                        else
+                        {
+                            btn.BackColor = Color.White; // Цвет свободного места
+                            btn.ForeColor = Color.Maroon;
+                        }
+                    }
+                    else
+                    {
+                        // Успешная покупка
+                        var newSeat = oldSeat with { Status = "free" };
+                        btn.Tag = newSeat;
+                        UpdateSeatButtonAppearance(btn);
+                    }
+                }
+
+                if (allBought)
+                {
+                    MessageBox.Show($"Успешно отменена бронь {_selectedSeats.Count} мест!", "Успех",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    _selectedSeats.Clear();
+                }
+                else
+                {
+                    MessageBox.Show("Не удалось отменить бронь некоторых мест.", "Внимание",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    _selectedSeats.Clear();
+                }
+            }
+            finally
+            {
+                _isProcessing = false;
+            }
+        }
+
+
         private async void BuySelectedSeats_Click(object sender, EventArgs e)
         {
             if (_isProcessing) return;
@@ -366,6 +450,12 @@ namespace CinemaClient.Forms
                 case "booked":
                     btn.BackColor = Color.FromArgb(220, 160, 220);
                     btn.ForeColor = Color.White;
+                    btn.Enabled = true;
+                    break;
+
+                case "free":
+                    btn.BackColor = Color.White;
+                    btn.ForeColor = Color.Black;
                     btn.Enabled = true;
                     break;
 
