@@ -1,12 +1,10 @@
-﻿// Services/ApiService.cs
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using static System.Net.WebRequestMethods;
-
 
 namespace CinemaClient.Services;
 
@@ -15,111 +13,30 @@ public class ApiService
     private readonly HttpClient _http;
     public string? Jwt { get; private set; }
 
-    public string? GetUserRole()
-    {
-        if (string.IsNullOrEmpty(Jwt)) return null;
-
-        if (string.IsNullOrEmpty(Jwt))
-            return null;
-
-        var handler = new JwtSecurityTokenHandler();
-        var token = handler.ReadJwtToken(Jwt); // Декодируем токен без проверки подписи
-        return token.Claims
-                   .FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value; // Ищем claim с ролью
-    }
-
     public ApiService(string baseUrl)
     {
+        // инициализация HttpClient с базовым адресом API
         _http = new HttpClient { BaseAddress = new Uri(baseUrl) };
-        // доверяем self-signed, если вдруг понадобится:
-        // ServicePointManager.ServerCertificateValidationCallback += (_,_,_,_) => true;
-    }
-    public async Task<bool> ConfirmBookingAsync(int ticketId)
-    {
-        var response = await _http.PostAsync($"api/tickets/{ticketId}/confirm", null);
-        return response.IsSuccessStatusCode;
     }
 
-    public async Task<string> GetUserEmailAsync()
-    {
-        var response = await _http.GetAsync("api/user/email");
-        return response.IsSuccessStatusCode ? await response.Content.ReadAsStringAsync() : null;
-    }
+    // ==================== АУТЕНТИФИКАЦИЯ И ПОЛЬЗОВАТЕЛЬ ====================
 
-    public async Task<string> GetUserNameAsync()
-    {
-        var response = await _http.GetAsync("api/user/name");
-        return response.IsSuccessStatusCode ? await response.Content.ReadAsStringAsync() : "Гость";
-    }
-    public async Task<SessionDto> GetSessionAsync(int sessionId)
-    {
-        try
-        {
-            var response = await _http.GetAsync($"api/sessions/{sessionId}");
-            if (response.IsSuccessStatusCode)
-            {
-                var session = await response.Content.ReadFromJsonAsync<SessionDto>();
-
-                // Если время приходит в формате DateTime, преобразуем в строку
-                if (session != null)
-                {
-                    // Пример преобразования, если нужно:
-                    // session.StartTime = session.StartTimeDateTime.ToString("HH:mm");
-                    // session.EndTime = session.EndTimeDateTime.ToString("HH:mm");
-                }
-
-                return session;
-            }
-            return null;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Ошибка при получении информации о сеансе: {ex.Message}");
-            return null;
-        }
-    }
-
-
-
-    public async Task<Image> GetMovieImageAsync(int movieId)
-    {
-        try
-        {
-            var response = await _http.GetAsync($"api/movies/{movieId}/movie_image");
-            response.EnsureSuccessStatusCode();
-
-            // Получаем содержимое ответа в виде потока
-            using (var stream = await response.Content.ReadAsStreamAsync())
-            {
-                // Преобразуем поток в изображение
-                return Image.FromStream(stream);
-            }
-        }
-        catch (HttpRequestException ex)
-        {
-            // Обработка ошибок запроса
-            Console.WriteLine($"Ошибка при получении изображения: {ex.Message}");
-            return null;
-        }
-        catch (Exception ex)
-        {
-            // Обработка других ошибок
-            Console.WriteLine($"Произошла ошибка: {ex.Message}");
-            return null;
-        }
-    }
+    // метод для входа пользователя в систему
     public async Task<bool> LoginAsync(string login, string password)
     {
+        // отправляем логин и пароль на сервер для аутентификации
         var resp = await _http.PostAsJsonAsync("/auth/login", new { login, password });
         if (!resp.IsSuccessStatusCode) return false;
 
+        // сохраняем JWT токен и устанавливаем заголовок авторизации
         Jwt = (await resp.Content.ReadFromJsonAsync<LoginResponse>())!.Token;
         _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Jwt);
         return true;
     }
 
+    // метод для регистрации нового пользователя
     public async Task<string?> RegisterAsync(string login, string pass, string pass2,
-                                         string first, string last, string email)
+                                     string first, string last, string email)
     {
         var body = new
         {
@@ -144,31 +61,147 @@ public class ApiService
             HttpStatusCode.BadRequest => "Пароли не совпадают",
             _ => $"Сервер вернул ошибку: {msg}"
         };
-
     }
 
-    // ФИЛЬМЫ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// Получение всех фильмов
+    // метод для получения роли текущего пользователя из JWT токена
+    public string? GetUserRole()
+    {
+        if (string.IsNullOrEmpty(Jwt)) return null;
+
+        var handler = new JwtSecurityTokenHandler();
+        var token = handler.ReadJwtToken(Jwt); // декодируем токен без проверки подписи
+        return token.Claims
+                   .FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value; // ищем claim с ролью
+    }
+
+    // метод для получения email текущего пользователя
+    public async Task<string> GetUserEmailAsync()
+    {
+        var response = await _http.GetAsync("api/user/email");
+        return response.IsSuccessStatusCode ? await response.Content.ReadAsStringAsync() : null;
+    }
+
+    // метод для получения имени текущего пользователя
+    public async Task<string> GetUserNameAsync()
+    {
+        var response = await _http.GetAsync("api/user/name");
+        return response.IsSuccessStatusCode ? await response.Content.ReadAsStringAsync() : "Гость";
+    }
+
+    // ==================== ФИЛЬМЫ (ДЛЯ ВСЕХ ПОЛЬЗОВАТЕЛЕЙ) ====================
+
+    // метод для получения списка всех фильмов
     public async Task<IEnumerable<MovieDto>> GetMoviesAsync()
     {
+        // отправляем GET-запрос для получения списка всех фильмов
+        // возвращаем пустой список, если ответ null
         return await _http.GetFromJsonAsync<IEnumerable<MovieDto>>("/admin/movies")
                ?? Enumerable.Empty<MovieDto>();
     }
 
-    // Получение одного фильма по ID
+    // метод для получения изображения фильма по его ID
+    public async Task<Image> GetMovieImageAsync(int movieId)
+    {
+        try
+        {
+            var response = await _http.GetAsync($"api/movies/{movieId}/movie_image");
+            response.EnsureSuccessStatusCode();
+
+            // получаем содержимое ответа в виде потока
+            using (var stream = await response.Content.ReadAsStreamAsync())
+            {
+                // преобразуем поток в изображение
+                return Image.FromStream(stream);
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            // обработка ошибок запроса
+            Console.WriteLine($"Ошибка при получении изображения: {ex.Message}");
+            return null;
+        }
+        catch (Exception ex)
+        {
+            // обработка других ошибок
+            Console.WriteLine($"Произошла ошибка: {ex.Message}");
+            return null;
+        }
+    }
+
+    // ==================== СЕАНСЫ (ДЛЯ ВСЕХ ПОЛЬЗОВАТЕЛЕЙ) ====================
+
+    // метод для получения списка всех сеансов
+    public async Task<IEnumerable<SessionDto>> GetSessionsAsync()
+        => await _http.GetFromJsonAsync<IEnumerable<SessionDto>>("/sessions")!;
+
+    // метод для получения информации о конкретном сеансе по его ID
+    public async Task<SessionDto> GetSessionAsync(int sessionId)
+    {
+        try
+        {
+            var response = await _http.GetAsync($"api/sessions/{sessionId}");
+            if (response.IsSuccessStatusCode)
+            {
+                var session = await response.Content.ReadFromJsonAsync<SessionDto>();
+                return session;
+            }
+            return null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка при получении информации о сеансе: {ex.Message}");
+            return null;
+        }
+    }
+
+    // метод для получения списка мест в зале для конкретного сеанса
+    public async Task<IEnumerable<SeatDto>> GetSeatsAsync(int sessionId)
+        => await _http.GetFromJsonAsync<IEnumerable<SeatDto>>($"/sessions/{sessionId}/seats")!;
+
+    // ==================== БРОНИРОВАНИЕ И ПОКУПКА БИЛЕТОВ ====================
+
+    // метод для бронирования билета
+    public async Task<int> BookAsync(int ticketId)
+        => (await _http.PostAsJsonAsync("/booking/book", new { ticketId }))
+           .StatusCode == System.Net.HttpStatusCode.OK ? 0 : -1;
+
+    // метод для покупки билета
+    public async Task<int> BuyAsync(int ticketId)
+        => (await _http.PostAsJsonAsync("/booking/buy", new { ticketId }))
+           .StatusCode == System.Net.HttpStatusCode.OK ? 0 : -1;
+
+    // метод для подтверждения бронирования
+    public async Task<bool> ConfirmBookingAsync(int ticketId)
+    {
+        var response = await _http.PostAsync($"api/tickets/{ticketId}/confirm", null);
+        return response.IsSuccessStatusCode;
+    }
+
+    // метод для отмены бронирования
+    public async Task<int> CancelBookingAsync(int ticketId)
+         => (await _http.DeleteAsync($"/booking/book/{ticketId}")).StatusCode == System.Net.HttpStatusCode.OK ? 0 : -1;
+
+    // метод для получения билетов текущего пользователя
+    public async Task<IEnumerable<UserTicketDto>> GetUserTicketsAsync() =>
+        await _http.GetFromJsonAsync<IEnumerable<UserTicketDto>>("/booking/my")!;
+
+    // ==================== АДМИНИСТРИРОВАНИЕ ФИЛЬМОВ ====================
+
+    // метод для получения информации о конкретном фильме (админ)
     public async Task<MovieDto?> GetMovieAsync(int movieId)
     {
+        // отправляем GET-запрос для получения информации о фильме по его ID
         return await _http.GetFromJsonAsync<MovieDto>($"/admin/movies/{movieId}");
     }
 
-    // Создание нового фильма
+    // метод для создания нового фильма (админ)
     public async Task<(bool Success, string? Error)> CreateMovieAsync(
-    string title,
-    int durationMinutes,
-    string director,
-    string ageRestriction,
-    byte[] Img
-        )
+        string title,
+        int durationMinutes,
+        string director,
+        string ageRestriction,
+        byte[] Img
+    )
     {
         var movie = new
         {
@@ -177,7 +210,6 @@ public class ApiService
             movieAuthor = director,
             movieAgeRating = ageRestriction,
             MovieImage = Img
-
         };
 
         var response = await _http.PostAsJsonAsync("/admin/movies", movie);
@@ -189,12 +221,14 @@ public class ApiService
         return (false, $"Ошибка: {response.StatusCode} - {error}");
     }
 
+    // метод для обновления информации о фильме (админ)
     public async Task<(bool Success, string? Error)> UpdateMovieAsync(
         int movieId,
         string title,
         int durationMinutes,
         string director,
-        string ageRestriction, byte[] Img)
+        string ageRestriction,
+        byte[] Img)
     {
         var movie = new
         {
@@ -204,7 +238,6 @@ public class ApiService
             movieAuthor = director,
             movieAgeRating = ageRestriction,
             movieImage = Img
-
         };
 
         var response = await _http.PutAsJsonAsync($"/admin/movies/{movieId}", movie);
@@ -216,8 +249,7 @@ public class ApiService
         return (false, $"Ошибка: {response.StatusCode} - {error}");
     }
 
-
-    // Удаление фильма
+    // метод для удаления фильма (админ)
     public async Task<(bool Success, string? Error)> DeleteMovieAsync(int movieId)
     {
         var response = await _http.DeleteAsync($"/admin/movies/{movieId}");
@@ -228,104 +260,17 @@ public class ApiService
         var error = await response.Content.ReadAsStringAsync();
         return (false, $"Ошибка: {response.StatusCode} - {error}");
     }
-    // КИНА НЕ БУДЕТ ФИЛЬМЫ ЗАКОНЧИЛИСЬ 
 
-    // а теперь сеансы!!
-    // Обновление существующего сеанса
-    public async Task<(bool Success, string? Error)> UpdateSessionAsync(
-        int sessionId,
-        string hallNumber,
-        string movieTitle,
-        DateTime sessionDateTime,
-        decimal price)
-    {
-        var session = new
-        {
-            SessionId = sessionId,
-            HallNumber = hallNumber,
-            MovieTitle = movieTitle,
-            SessionDateTime = sessionDateTime,
-            Price = price
-        };
+    // ==================== АДМИНИСТРИРОВАНИЕ СЕАНСОВ ====================
 
-        var response = await _http.PutAsJsonAsync($"/admin/sessions/{sessionId}", session);
-
-        if (response.IsSuccessStatusCode)
-            return (true, null);
-
-        var error = await response.Content.ReadAsStringAsync();
-        return (false, $"Ошибка: {response.StatusCode} - {error}");
-    }
-
-    // Создание нового сеанса
-    public async Task<(bool Success, string? Error)> CreateSessionAsync(
-        string hallNumber,
-        string movieTitle,
-        DateTime sessionDateTime,
-        decimal price)
-    {
-        var session = new
-        {
-            HallNumber = hallNumber,
-            MovieTitle = movieTitle,
-            SessionDateTime = sessionDateTime,
-            Price = price
-        };
-
-        var response = await _http.PostAsJsonAsync("/admin/sessions", session);
-
-        if (response.IsSuccessStatusCode)
-            return (true, null);
-
-        var error = await response.Content.ReadAsStringAsync();
-        return (false, $"Ошибка: {response.StatusCode} - {error}");
-    }
-
-    // Удаление сеанса
-    public async Task<(bool Success, string? Error)> DeleteSessionAsync(int sessionId)
-    {
-        var response = await _http.DeleteAsync($"/admin/sessions/{sessionId}");
-
-        if (response.IsSuccessStatusCode)
-            return (true, null);
-
-        var error = await response.Content.ReadAsStringAsync();
-        return (false, $"Ошибка: {response.StatusCode} - {error}");
-    }
-
-
-
-    public async Task<IEnumerable<SessionDto>> GetSessionsAsync()
-        => await _http.GetFromJsonAsync<IEnumerable<SessionDto>>("/sessions")!;
-
-    public async Task<IEnumerable<SeatDto>> GetSeatsAsync(int sessionId)
-        => await _http.GetFromJsonAsync<IEnumerable<SeatDto>>($"/sessions/{sessionId}/seats")!;
-
-    public async Task<int> BookAsync(int ticketId)
-        => (await _http.PostAsJsonAsync("/booking/book", new { ticketId }))
-           .StatusCode == System.Net.HttpStatusCode.OK ? 0 : -1;
-
-    public async Task<int> BuyAsync(int ticketId)
-        => (await _http.PostAsJsonAsync("/booking/buy", new { ticketId }))
-           .StatusCode == System.Net.HttpStatusCode.OK ? 0 : -1;
-
-    public async Task<int> CancelBookingAsync(int ticketId)
-         => (await _http.DeleteAsync($"/booking/book/{ ticketId }")).StatusCode == System.Net.HttpStatusCode.OK ? 0 : -1;
-
-    private record LoginResponse(string Token);
-
-
-
-
-    // СУАНСЫ
-
-    // Добавьте эти методы в класс ApiService
+    // метод для получения списка сеансов (админ)
     public async Task<IEnumerable<SessionAdminDto>> GetSessionsAdminAsync()
     {
         return await _http.GetFromJsonAsync<IEnumerable<SessionAdminDto>>("/admin/sessions")
                ?? Enumerable.Empty<SessionAdminDto>();
     }
 
+    // метод для создания нового сеанса (админ)
     public async Task<(bool Success, string? Error)> CreateSessionAsync(
         int hallId,
         int movieId,
@@ -349,6 +294,7 @@ public class ApiService
         return (false, $"Ошибка: {response.StatusCode} - {error}");
     }
 
+    // метод для обновления информации о сеансе (админ)
     public async Task<(bool Success, string? Error)> UpdateSessionAsync(
         int sessionId,
         int hallId,
@@ -372,26 +318,38 @@ public class ApiService
 
         var error = await response.Content.ReadAsStringAsync();
         return (false, $"Ошибка: {response.StatusCode} - {error}");
-
-
     }
 
-    public async Task<IEnumerable<UserTicketDto>> GetUserTicketsAsync() =>
-        await _http.GetFromJsonAsync<IEnumerable<UserTicketDto>>("/booking/my")!;
+    // метод для удаления сеанса (админ)
+    public async Task<(bool Success, string? Error)> DeleteSessionAsync(int sessionId)
+    {
+        var response = await _http.DeleteAsync($"/admin/sessions/{sessionId}");
 
+        if (response.IsSuccessStatusCode)
+            return (true, null);
+
+        var error = await response.Content.ReadAsStringAsync();
+        return (false, $"Ошибка: {response.StatusCode} - {error}");
+    }
+
+    private record LoginResponse(string Token);
 }
 
+// ==================== DTO КЛАССЫ ====================
+
+// класс для представления информации о сеансе
 public record SessionDto(
-    int SessionId, 
+    int SessionId,
     DateTime SessionDateTime,
     string HallNumber,
-    string MovieTitle, 
-    byte[] MovieImage, 
+    string MovieTitle,
+    byte[] MovieImage,
     decimal Price);
 
-
+// класс для представления информации о месте в зале
 public record SeatDto(int TicketId, int Row, int Number, string Status);
 
+// класс для представления информации о пользователе
 public record UserDto(
     int UserId,
     string Login,
@@ -399,6 +357,7 @@ public record UserDto(
     byte[] PasswordHash
 );
 
+// класс для представления информации о фильме
 public record MovieDto(
     int movieId,
     string movieTitle,
@@ -408,6 +367,7 @@ public record MovieDto(
     byte[] movieImage
 );
 
+// класс для представления информации о корзине
 public record KorzinaDto(
     int SessionId,
     int MovieId,
@@ -422,14 +382,13 @@ public record KorzinaDto(
     string FullSessionInfo
 );
 
-
-// сеансы
-
-// Добавьте эти DTO в ApiService.cs
+// класс для представления информации о зале
 public record HallDto(
     int hallId,
     string hallNumber
 );
+
+// класс для представления информации о сеансе (админ)
 public record SessionAdminDto(
     int sessionId,
     int hallId,
@@ -441,6 +400,7 @@ public record SessionAdminDto(
     decimal sessionPrice
 );
 
+// класс для представления информации о билете пользователя
 public record UserTicketDto(
     int TicketId,
     int Flag,            // 1 = будет, 0 = прошло/бронь
@@ -452,4 +412,3 @@ public record UserTicketDto(
     int Seat,
     DateTime SessionDateTime,
     decimal Price);
-
