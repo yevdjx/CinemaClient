@@ -48,9 +48,9 @@ namespace CinemaClient.Services
             var smallF = new iTextFont(baseF, 10, iTextFont.NORMAL); // Мелкий
 
             // Цвета для оформления 
-            var headerBg = new BaseColor(220, 20, 60);   // красный (Crimson)
-            var headYel = new BaseColor(255, 215, 0);   // ярко-жёлтый (шапка таблицы)
-            var cellYel = new BaseColor(255, 239, 153); // бледно-жёлтый (данные)
+            var headerBg = new BaseColor(235, 82, 132);   // красный (Crimson)
+            var headYel = new BaseColor(255, 207, 64);   // ярко-жёлтый (шапка таблицы)
+            var cellYel = new BaseColor(255, 200, 168); // бледно-жёлтый (данные)
 
             // Шапка БИЛЕТ
             var headerTbl = new PdfPTable(1) { WidthPercentage = 100, SpacingAfter = 8 };
@@ -92,7 +92,7 @@ namespace CinemaClient.Services
             });
 
             // Заголовки столбцов
-            foreach (var h in new[] { "ФИЛЬМ", "ДАТА", "ВРЕМЯ", "ЗАЛ", "РЯД", "МЕСТО", "ЦЕНА" })
+            foreach (var h in new[] { "АГРОФИЛЬМ", "ДАТА", "ВРЕМЯ", "ЗАЛ", "РЯД", "МЕСТО", "ЦЕНА" })
                 AddHead(h);
 
             // Добавляем данные билета
@@ -124,7 +124,7 @@ namespace CinemaClient.Services
 
             // Сайд-бар «КОНТРОЛЬ» 
             var redColor = new BaseColor(255, 0, 0);
-            var controlCell = new PdfPCell(new Phrase("КОНТРОЛЬ",
+            var controlCell = new PdfPCell(new Phrase("АГРОКОНТРОЛЬ",
                                 new iTextFont(baseF, 14, iTextFont.BOLD, redColor)))
             {
                 Rotation = 90,  // Поворачиваем текст на 90 градусов
@@ -144,7 +144,7 @@ namespace CinemaClient.Services
             inner.AddCell(headerTbl); // Шапка "БИЛЕТ"
             inner.AddCell(dataTbl); // Таблица с даннымм
             // Футер с информацией о кинотеатре
-            inner.AddCell(new PdfPCell(new Phrase("Кинотеатр AgroKino  •  www.agrocinema.ru", smallF))
+            inner.AddCell(new PdfPCell(new Phrase("Кинотеатр AgroKino", smallF))
             {
                 Border = iTextRectangle.NO_BORDER,
                 HorizontalAlignment = Element.ALIGN_CENTER,
@@ -175,7 +175,7 @@ namespace CinemaClient.Services
                     smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
 
                     // Определяем тип билета (билет или бронь)
-                    string ticketType = ticketInfo.Status == "sold" ? "билет" : "бронь";
+                    string ticketType = ticketInfo.Status == "sold" ? "агробилет" : "агробронь";
 
                     // Создаем email сообщение
                     var mailMessage = new MailMessage
